@@ -12,6 +12,7 @@ out/
 
 # Production
 build
+stock_register.xlsx
 
 # Misc
 .DS_Store
