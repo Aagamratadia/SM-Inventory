@@ -12,12 +12,10 @@ interface AddItemFormProps {
 
 export default function AddItemForm({ onSuccess, onClose }: AddItemFormProps) {
   const [formData, setFormData] = useState({
+    category: '',
     name: '',
-    itemId: '',
-    shape: '',
-    carat: '',
-    clarity: '',
-    color: '',
+    vendorname: '',
+    quantity: '',
     price: '',
     notes: '',
   });
@@ -44,7 +42,6 @@ export default function AddItemForm({ onSuccess, onClose }: AddItemFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             ...formData,
-            carat: formData.carat ? Number(formData.carat) : undefined,
             price: formData.price ? Number(formData.price) : undefined,
         }),
       });
@@ -68,15 +65,19 @@ export default function AddItemForm({ onSuccess, onClose }: AddItemFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name *</label>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Item Category *</label>
+        <input type="text" name="category" id="category" value={formData.category} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+      </div>
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Item Name *</label>
         <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       </div>
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Vendor Name *</label>
+        <input type="text" name="vendorname" id="vendorname" value={formData.vendorname} onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="text" name="itemId" placeholder="Item ID" value={formData.itemId} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
-        <input type="text" name="shape" placeholder="Shape" value={formData.shape} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
-        <input type="number" name="carat" placeholder="Carat" value={formData.carat} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
-        <input type="text" name="clarity" placeholder="Clarity" value={formData.clarity} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
-        <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
+        <input type="text" name="quantity" placeholder="Quantity" value={formData.quantity} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
         <input type="number" name="price" placeholder="Price" value={formData.price} onChange={handleChange} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" />
       </div>
       <div>

@@ -17,7 +17,7 @@ stock_register.xlsx
 # Misc
 .DS_Store
 *.pem
-
+project requirements/
 # Debug logs
 npm-debug.log*
 yarn-debug.log*
