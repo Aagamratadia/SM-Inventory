@@ -158,9 +158,7 @@ export default function InventoryPage() {
                   ) : (
                     <button onClick={() => setItemToAssign(item)} className="px-2 py-1 text-xs text-white bg-blue-600 rounded">Assign</button>
                   )}
-                  <Link href={`/dashboard/items/${item._id}`}>
-                    <a className="px-2 py-1 text-xs text-white bg-gray-600 rounded">Details</a>
-                  </Link>
+                  <Link href={`/dashboard/items/${item._id}`} className="px-2 py-1 text-xs text-white bg-gray-600 rounded">Details</Link>
                   <button onClick={() => setItemToEdit(item)} className="px-2 py-1 text-xs text-white bg-indigo-600 rounded">Edit</button>
                   <button onClick={() => setItemToDelete(item)} className="px-2 py-1 text-xs text-white bg-red-600 rounded">Delete</button>
                 </td>
