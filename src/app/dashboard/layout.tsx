@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import { auth as authOptions } from '@/auth.config';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { SignOutButton } from '@/components/auth/SignOutButton';

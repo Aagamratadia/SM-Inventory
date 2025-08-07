@@ -1,4 +1,12 @@
 import NextAuth from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { auth as authConfig } from '@/auth.config';
 
-export const { auth, signIn, signOut, handlers } = NextAuth(authOptions);
+export const { 
+  auth, 
+  signIn, 
+  signOut, 
+  handlers 
+} = NextAuth({
+  ...authConfig,
+  // Add any additional configuration here if needed
+});
