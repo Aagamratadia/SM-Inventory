@@ -9,7 +9,9 @@ export interface IAssignment extends Document {
 }
 
 export interface IItem extends Document {
+  category: string; // Added category field
   name: string;
+  vendorname?: string;
   itemId?: string;
   shape?: string;
   carat?: number;
@@ -31,9 +33,21 @@ const AssignmentSchema: Schema = new Schema({
 
 const ItemSchema: Schema = new Schema(
   {
+    category: {
+      type: String,
+      required: [true, 'Please provide an item category.'],
+      unique: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, 'Please provide an item name.'],
+      unique: true,
+      trim: true,
+    },
+    vendorname: {
+      type: String,
+      required: [true, 'Please provide an vendor name.'],
       unique: true,
       trim: true,
     },

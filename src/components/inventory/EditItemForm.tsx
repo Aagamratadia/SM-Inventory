@@ -17,7 +17,9 @@ export default function EditItemForm({ item, onItemUpdated, onClose }: EditItemF
   useEffect(() => {
     if (item) {
       setFormData({
+        category: item.category,
         name: item.name,
+        vendorname: item.vendorname,
         itemId: item.itemId,
         shape: item.shape,
         carat: item.carat,
