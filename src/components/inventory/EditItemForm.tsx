@@ -21,10 +21,7 @@ export default function EditItemForm({ item, onItemUpdated, onClose }: EditItemF
         name: item.name,
         vendorname: item.vendorname,
         itemId: item.itemId,
-        shape: item.shape,
-        carat: item.carat,
-        clarity: item.clarity,
-        color: item.color,
+        quantity: item.quantity,
         price: item.price,
         notes: item.notes,
       });
@@ -67,13 +64,11 @@ export default function EditItemForm({ item, onItemUpdated, onClose }: EditItemF
     <form onSubmit={handleSubmit} className="space-y-4">
        {error && <p className="text-red-500 text-sm">{error}</p>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input name="category" value={formData.category || ''} onChange={handleChange} placeholder="Category" required className="w-full px-3 py-2 border rounded" />
         <input name="name" value={formData.name || ''} onChange={handleChange} placeholder="Name" required className="w-full px-3 py-2 border rounded" />
-        <input name="itemId" value={formData.itemId || ''} onChange={handleChange} placeholder="Item ID" required className="w-full px-3 py-2 border rounded" />
-        <input name="shape" value={formData.shape || ''} onChange={handleChange} placeholder="Shape" className="w-full px-3 py-2 border rounded" />
-        <input type="number" name="carat" value={formData.carat || ''} onChange={handleChange} placeholder="Carat" className="w-full px-3 py-2 border rounded" />
-        <input name="clarity" value={formData.clarity || ''} onChange={handleChange} placeholder="Clarity" className="w-full px-3 py-2 border rounded" />
-        <input name="color" value={formData.color || ''} onChange={handleChange} placeholder="Color" className="w-full px-3 py-2 border rounded" />
+        <input name="vendorname" value={formData.vendorname || ''} onChange={handleChange} placeholder="VendorName" required className="w-full px-3 py-2 border rounded" />
         <input type="number" name="price" value={formData.price || ''} onChange={handleChange} placeholder="Price" className="w-full px-3 py-2 border rounded" />
+        <input type="number" name="quantity" value={formData.quantity || ''} onChange={handleChange} placeholder="quantity" className="w-full px-3 py-2 border rounded" />
       </div>
       <textarea name="notes" value={formData.notes || ''} onChange={handleChange} placeholder="Notes" className="w-full px-3 py-2 border rounded"></textarea>
       <div className="flex justify-end space-x-4">

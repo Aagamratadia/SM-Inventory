@@ -13,11 +13,8 @@ export interface IItem extends Document {
   name: string;
   vendorname?: string;
   itemId?: string;
-  shape?: string;
-  carat?: number;
-  clarity?: string;
-  color?: string;
   price?: number;
+  quantity?: number;
   notes?: string;
   assignedTo?: Types.ObjectId;
   assignmentHistory: IAssignment[];
@@ -53,10 +50,8 @@ const ItemSchema: Schema = new Schema(
     },
     itemId: { type: String, trim: true },
     shape: { type: String, trim: true },
-    carat: { type: Number },
-    clarity: { type: String, trim: true },
-    color: { type: String, trim: true },
     price: { type: Number },
+    quantity: { type: Number },
     notes: { type: String },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     assignmentHistory: [AssignmentSchema],
