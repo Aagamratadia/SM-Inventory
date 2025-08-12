@@ -29,6 +29,9 @@ export default async function DashboardLayout({
           <Link href="/dashboard/users" className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200">
             Users
           </Link>
+          <Link href="/dashboard/vendors" className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200">
+            Vendors
+          </Link>
           <Link href="/dashboard/history" className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200">
             Assignment Log
           </Link>
