@@ -13,6 +13,7 @@ interface AssignItemFormProps {
 export default function AssignItemForm({ item, onItemAssigned, onClose }: AssignItemFormProps) {
   const [users, setUsers] = useState<IUser[]>([]);
   const [selectedUserId, setSelectedUserId] = useState('');
+  const [quantity, setQuantity] = useState<number>(1);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -39,6 +40,10 @@ export default function AssignItemForm({ item, onItemAssigned, onClose }: Assign
       setError('Please select a user.');
       return;
     }
+    if (!item.quantity || quantity < 1 || quantity > (item.quantity || 0)) {
+      setError('Please select a valid quantity.');
+      return;
+    }
     setError('');
     setSubmitting(true);
 
@@ -46,7 +51,7 @@ export default function AssignItemForm({ item, onItemAssigned, onClose }: Assign
       const res = await fetch(`/api/items/${item._id}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: selectedUserId }),
+        body: JSON.stringify({ userId: selectedUserId, quantity }),
       });
 
       if (!res.ok) {
@@ -85,6 +90,21 @@ export default function AssignItemForm({ item, onItemAssigned, onClose }: Assign
           ))}
         </select>
       </div>
+      <div>
+        <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+          Quantity (Available: {item.quantity || 0})
+        </label>
+        <select
+          id="quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(Number(e.target.value))}
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        >
+          {Array.from({ length: item.quantity || 0 }, (_, idx) => idx + 1).map((q) => (
+            <option key={q} value={q}>{q}</option>
+          ))}
+        </select>
+      </div>
       <div className="flex justify-end space-x-4">
         <button
           type="button"
@@ -96,7 +116,7 @@ export default function AssignItemForm({ item, onItemAssigned, onClose }: Assign
         </button>
         <button
           type="submit"
-          disabled={!selectedUserId || submitting}
+          disabled={!selectedUserId || submitting || (item.quantity || 0) === 0}
           className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 disabled:bg-indigo-300"
         >
           {submitting ? 'Assigning...' : 'Assign Item'}

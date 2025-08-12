@@ -6,6 +6,7 @@ export interface IAssignment extends Document {
   returnedAt?: Date;
   action: 'assigned' | 'returned';
   priceAtAssignment?: number;
+  quantity: number;
 }
 
 export interface IItem extends Document {
@@ -26,6 +27,7 @@ const AssignmentSchema: Schema = new Schema({
   returnedAt: { type: Date },
   priceAtAssignment: { type: Number },
   action: { type: String, required: true, enum: ['assigned', 'returned'] },
+  quantity: { type: Number, required: true },
 });
 
 const ItemSchema: Schema = new Schema(

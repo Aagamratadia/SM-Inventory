@@ -12,10 +12,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const { id } = params; // Item ID
-  const { userId } = await req.json(); // User ID to assign to
+  const { userId, quantity } = await req.json(); // User ID to assign to and quantity
 
   if (!userId) {
     return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+  }
+  const qty = Number(quantity ?? 1);
+  if (!Number.isInteger(qty) || qty <= 0) {
+    return NextResponse.json({ message: 'Quantity must be a positive integer' }, { status: 400 });
   }
 
   try {
@@ -25,8 +29,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (!itemToAssign) {
       return NextResponse.json({ message: 'Item not found' }, { status: 404 });
     }
-    if (itemToAssign.assignedTo) {
-      return NextResponse.json({ message: 'Item is already assigned' }, { status: 400 });
+    const available = itemToAssign.quantity ?? 0;
+    if (available <= 0) {
+      return NextResponse.json({ message: 'No stock available to assign' }, { status: 400 });
+    }
+    if (qty > available) {
+      return NextResponse.json({ message: `Requested quantity ${qty} exceeds available stock ${available}` }, { status: 400 });
     }
 
     const userExists = await User.findById(userId);
@@ -34,11 +42,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    itemToAssign.assignedTo = userId;
+    // Decrement available stock and record assignment entry with quantity
+    itemToAssign.quantity = available - qty;
+    // If stock fully assigned to this user, mark assignedTo; otherwise leave null
+    itemToAssign.assignedTo = itemToAssign.quantity === 0 ? userId : null;
     itemToAssign.assignmentHistory.push({
       user: userId,
       assignedAt: new Date(),
       action: 'assigned',
+      quantity: qty,
     });
 
     const updatedItem = await itemToAssign.save();
