@@ -135,6 +135,7 @@ export default function InventoryPage() {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
@@ -146,7 +147,8 @@ export default function InventoryPage() {
               <tr key={item._id as string}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.price ? `$${item.price.toLocaleString()}` : 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.quantity}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.price ? `₹${item.price.toLocaleString()}` : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {item.assignedTo ? 
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Assigned</span> : 
