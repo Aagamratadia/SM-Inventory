@@ -64,7 +64,7 @@ export default function ItemDetailPage() {
             <dl className="space-y-4">
               <div>
                 <dt className="text-sm font-medium text-gray-500">Price</dt>
-                <dd className="mt-1 text-lg text-gray-900">{item.price ? `$${item.price.toLocaleString()}` : 'N/A'}</dd>
+                <dd className="mt-1 text-lg text-gray-900">{item.price ? `₹${item.price.toLocaleString()}` : 'N/A'}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500">Status</dt>
@@ -100,6 +100,7 @@ export default function ItemDetailPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
@@ -113,6 +114,7 @@ export default function ItemDetailPage() {
                           {entry.action}
                         </span>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.quantity ?? 1}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(entry.assignedAt || entry.returnedAt!).toLocaleString()}
                       </td>
@@ -120,7 +122,7 @@ export default function ItemDetailPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} className="px-6 py-4 text-center text-sm text-gray-500">No assignment history for this item.</td>
+                    <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">No assignment history for this item.</td>
                   </tr>
                 )}
               </tbody>
