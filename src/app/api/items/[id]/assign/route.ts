@@ -42,6 +42,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
+    // Ensure existing history entries have quantity for backward compatibility (mutate in-place)
+    if (Array.isArray(itemToAssign.assignmentHistory)) {
+      itemToAssign.assignmentHistory.forEach((entry: any) => {
+        if (entry && entry.quantity == null) {
+          entry.quantity = 1;
+        }
+      });
+    }
+
     // Decrement available stock and record assignment entry with quantity
     itemToAssign.quantity = available - qty;
     // If stock fully assigned to this user, mark assignedTo; otherwise leave null
@@ -51,7 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       assignedAt: new Date(),
       action: 'assigned',
       quantity: qty,
-    });
+    } as any);
 
     const updatedItem = await itemToAssign.save();
 

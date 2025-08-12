@@ -6,7 +6,7 @@ export interface IAssignment extends Document {
   returnedAt?: Date;
   action: 'assigned' | 'returned';
   priceAtAssignment?: number;
-  quantity: number;
+  quantity?: number;
 }
 
 export interface IItem extends Document {
@@ -27,7 +27,7 @@ const AssignmentSchema: Schema = new Schema({
   returnedAt: { type: Date },
   priceAtAssignment: { type: Number },
   action: { type: String, required: true, enum: ['assigned', 'returned'] },
-  quantity: { type: Number, required: true },
+  quantity: { type: Number, default: 1 },
 });
 
 const ItemSchema: Schema = new Schema(
@@ -61,4 +61,8 @@ const ItemSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Item || mongoose.model<IItem>('Item', ItemSchema);
+// In Next.js dev, the model may be cached with an old schema. Delete to force recompile.
+if (mongoose.models.Item) {
+  delete (mongoose.models as any).Item;
+}
+export default mongoose.model<IItem>('Item', ItemSchema);
