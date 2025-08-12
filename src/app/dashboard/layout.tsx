@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-64 bg-white border-r">
+      <div className="hidden md:flex flex-col w-64 flex-none bg-white border-r">
         <div className="flex items-center justify-center h-16 border-b">
           <h1 className="text-2xl font-bold text-indigo-600">SM Inventory</h1>
         </div>
@@ -39,7 +39,7 @@ export default async function DashboardLayout({
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col flex-grow">
+      <div className="flex flex-col flex-grow min-w-0">
         <div className="flex items-center justify-between h-16 px-8 bg-white border-b">
           <div>
             <h2 className="text-lg font-semibold">Welcome, {session.user?.name}</h2>
@@ -48,7 +48,7 @@ export default async function DashboardLayout({
             <SignOutButton />
           </div>
         </div>
-        <main className="flex-grow p-8 overflow-auto">
+        <main className="flex-grow p-8 overflow-auto min-w-0">
             {children}
         </main>
       </div>
