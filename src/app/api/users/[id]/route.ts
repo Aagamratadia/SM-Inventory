@@ -14,7 +14,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   const { id } = params;
   const body = await req.json();
-  const { name, email, role, password } = body;
+  const { name, email, role, password, department } = body;
 
   if (!id) {
     return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
@@ -28,7 +28,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    const updateData: any = { name, email, role };
+    const updateData: any = { name, email, role, department };
 
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);

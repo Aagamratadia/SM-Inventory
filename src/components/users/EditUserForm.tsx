@@ -14,6 +14,7 @@ export default function EditUserForm({ user, onUserUpdated, onClose }: EditUserF
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('staff');
+  const [department, setDepartment] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,6 +23,7 @@ export default function EditUserForm({ user, onUserUpdated, onClose }: EditUserF
       setName(user.name);
       setEmail(user.email);
       setRole(user.role);
+      setDepartment((user as any).department || '');
     }
   }, [user]);
 
@@ -30,7 +32,7 @@ export default function EditUserForm({ user, onUserUpdated, onClose }: EditUserF
     setError('');
     setSubmitting(true);
 
-    const updatedData: any = { name, email, role };
+    const updatedData: any = { name, email, role, department };
     if (password) {
       updatedData.password = password;
     }
@@ -73,6 +75,19 @@ export default function EditUserForm({ user, onUserUpdated, onClose }: EditUserF
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label htmlFor="department" className="block text-sm font-medium text-gray-700">
+          Department
+        </label>
+        <input
+          type="text"
+          id="department"
+          value={department}
+          onChange={(e) => setDepartment(e.target.value)}
+          placeholder="e.g. Sales, IT, HR"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
       </div>

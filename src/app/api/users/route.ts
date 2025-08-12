@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   try {
     await dbConnect();
-    const { name, email, password, role } = await request.json();
+    const { name, email, password, role, department } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       email,
       password: hashedPassword,
       role,
+      department,
     });
 
     // Don't send the password back
