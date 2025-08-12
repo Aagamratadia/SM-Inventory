@@ -40,7 +40,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Item name is required' }, { status: 400 });
     }
 
-    const newItem = await Item.create(body);
+    // Normalize quantity fields
+    const qty = body.quantity != null && body.quantity !== '' ? Number(body.quantity) : 0;
+    const payload = {
+      ...body,
+      quantity: Number.isFinite(qty) && qty >= 0 ? qty : 0,
+      totalQuantity: Number.isFinite(qty) && qty >= 0 ? qty : 0,
+    };
+
+    const newItem = await Item.create(payload);
     return NextResponse.json(newItem, { status: 201 });
   } catch (error: any) {
     console.error('Error creating item:', error);

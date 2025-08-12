@@ -7,7 +7,6 @@ import Modal from '@/components/ui/Modal';
 import AddItemForm from '@/components/inventory/AddItemForm';
 import EditItemForm from '@/components/inventory/EditItemForm';
 import AssignItemForm from '@/components/inventory/AssignItemForm';
-import ImportItemsForm from '@/components/inventory/ImportItemsForm';
 import { IItem } from '@/models/Item';
 import Link from 'next/link';
 
@@ -18,7 +17,7 @@ export default function InventoryPage() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  // Removed Import modal per request; now using Stock Tracker page instead
   const [itemToEdit, setItemToEdit] = useState<IItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<IItem | null>(null);
   const [itemToAssign, setItemToAssign] = useState<IItem | null>(null);
@@ -51,9 +50,7 @@ export default function InventoryPage() {
     setFilteredItems(results);
   }, [searchTerm, items]);
 
-    const handleImportSuccess = () => {
-    fetchItems(); // Re-fetch items after import
-  };
+  // Import flow removed
 
   const handleAddItemSuccess = (newItem: IItem) => {
     setItems((prevItems) => [...prevItems, newItem]);
@@ -73,7 +70,7 @@ export default function InventoryPage() {
         throw new Error('Failed to return item');
       }
       const updatedItem = await res.json();
-      handleItemAssigned(updatedItem); // Reuse the update logic
+      handleItemAssigned(updatedItem); // reuse update logic
     } catch (error) {
       console.error('Failed to return item', error);
       setError('Failed to return item');
@@ -110,9 +107,9 @@ export default function InventoryPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Inventory</h1>
         <div className="flex space-x-4">
-          <button onClick={() => setIsImportModalOpen(true)} className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">
-            Import from Excel
-          </button>
+          <Link href="/dashboard/stock" className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">
+            Stock Tracker
+          </Link>
           <button onClick={() => setIsAddItemModalOpen(true)} className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
             Add New Item
           </button>
@@ -199,12 +196,7 @@ export default function InventoryPage() {
         </Modal>
       )}
 
-      <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Import Items from Excel">
-        <ImportItemsForm 
-          onImportSuccess={handleImportSuccess}
-          onClose={() => setIsImportModalOpen(false)} 
-        />
-      </Modal>
+      {/* Removed Return modal and Import modal */}
 
       {itemToDelete && (
         <Modal isOpen={!!itemToDelete} onClose={() => setItemToDelete(null)} title="Delete Item">

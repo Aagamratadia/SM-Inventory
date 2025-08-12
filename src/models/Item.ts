@@ -6,7 +6,7 @@ export interface IAssignment extends Document {
   returnedAt?: Date;
   action: 'assigned' | 'returned';
   priceAtAssignment?: number;
-  quantity?: number;
+  quantity: number; // quantity assigned or returned in this history entry
 }
 
 export interface IItem extends Document {
@@ -15,7 +15,10 @@ export interface IItem extends Document {
   vendorname?: string;
   itemId?: string;
   price?: number;
+  // quantity represents AVAILABLE stock
   quantity?: number;
+  // totalQuantity represents TOTAL units ever added (for stock checks)
+  totalQuantity?: number;
   notes?: string;
   assignedTo?: Types.ObjectId;
   assignmentHistory: IAssignment[];
@@ -27,7 +30,7 @@ const AssignmentSchema: Schema = new Schema({
   returnedAt: { type: Date },
   priceAtAssignment: { type: Number },
   action: { type: String, required: true, enum: ['assigned', 'returned'] },
-  quantity: { type: Number, default: 1 },
+  quantity: { type: Number, required: true, min: 1 },
 });
 
 const ItemSchema: Schema = new Schema(
@@ -53,7 +56,10 @@ const ItemSchema: Schema = new Schema(
     itemId: { type: String, trim: true },
     shape: { type: String, trim: true },
     price: { type: Number },
-    quantity: { type: Number },
+    // quantity is AVAILABLE count
+    quantity: { type: Number, default: 0, min: 0 },
+    // totalQuantity is TOTAL count ever added (initially equals quantity)
+    totalQuantity: { type: Number, default: 0, min: 0 },
     notes: { type: String },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     assignmentHistory: [AssignmentSchema],

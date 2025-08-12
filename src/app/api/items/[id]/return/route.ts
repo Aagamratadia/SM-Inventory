@@ -11,6 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const { id } = params; // Item ID
+  const { quantity } = await req.json();
 
   try {
     await dbConnect();
@@ -19,17 +20,48 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (!itemToReturn) {
       return NextResponse.json({ message: 'Item not found' }, { status: 404 });
     }
-    if (!itemToReturn.assignedTo) {
-      return NextResponse.json({ message: 'Item is not currently assigned' }, { status: 400 });
+    const qty = Number(quantity ?? 1);
+    if (!Number.isInteger(qty) || qty <= 0) {
+      return NextResponse.json({ message: 'Quantity must be a positive integer' }, { status: 400 });
     }
 
-    const returningUser = itemToReturn.assignedTo;
-    itemToReturn.assignedTo = undefined;
+    const currentAvailable = itemToReturn.quantity ?? 0;
+    let total = itemToReturn.totalQuantity;
+    let assignedOut = 0;
+    if (typeof total === 'number' && Number.isFinite(total)) {
+      assignedOut = Math.max(total - currentAvailable, 0);
+    } else {
+      // Infer assignedOut from history for legacy items
+      const hist = Array.isArray(itemToReturn.assignmentHistory) ? itemToReturn.assignmentHistory : [];
+      const netAssigned = hist.reduce((acc: number, h: any) => {
+        const q = Number(h?.quantity ?? 1);
+        if (h?.action === 'assigned') return acc + (Number.isFinite(q) ? q : 1);
+        if (h?.action === 'returned') return acc - (Number.isFinite(q) ? q : 1);
+        return acc;
+      }, 0);
+      assignedOut = Math.max(netAssigned, 0);
+      total = currentAvailable + assignedOut;
+      // store computed total to stabilize future operations (best-effort)
+      itemToReturn.totalQuantity = total;
+    }
+    if (assignedOut <= 0) {
+      return NextResponse.json({ message: 'No assigned stock to return' }, { status: 400 });
+    }
+    if (qty > assignedOut) {
+      return NextResponse.json({ message: `Cannot return ${qty}; only ${assignedOut} assigned out` }, { status: 400 });
+    }
+
+    // Increase available stock by qty, capped at total
+    itemToReturn.quantity = Math.min(currentAvailable + qty, total);
+    // Capture previous assignee then clear marker
+    const previousAssignee = itemToReturn.assignedTo as any;
+    itemToReturn.assignedTo = null as any;
     itemToReturn.assignmentHistory.push({
-      user: returningUser,
+      user: previousAssignee,
       returnedAt: new Date(),
       action: 'returned',
-    });
+      quantity: qty,
+    } as any);
 
     const updatedItem = await itemToReturn.save();
 
