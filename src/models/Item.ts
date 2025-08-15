@@ -7,6 +7,7 @@ export interface IAssignment extends Document {
   action: 'assigned' | 'returned';
   priceAtAssignment?: number;
   quantity: number; // quantity assigned or returned in this history entry
+  performedBy?: Types.ObjectId; // actor who performed the action
 }
 
 export interface IItem extends Document {
@@ -31,6 +32,7 @@ const AssignmentSchema: Schema = new Schema({
   priceAtAssignment: { type: Number },
   action: { type: String, required: true, enum: ['assigned', 'returned'] },
   quantity: { type: Number, required: true, min: 1 },
+  performedBy: { type: Schema.Types.ObjectId, ref: 'User' },
 });
 
 const ItemSchema: Schema = new Schema(

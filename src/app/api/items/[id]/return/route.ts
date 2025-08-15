@@ -61,6 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       returnedAt: new Date(),
       action: 'returned',
       quantity: qty,
+      performedBy: (session as any)?.user?.id || (session as any)?.user?._id,
     } as any);
 
     const updatedItem = await itemToReturn.save();

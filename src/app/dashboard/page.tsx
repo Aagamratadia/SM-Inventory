@@ -110,6 +110,9 @@ export default function InventoryPage() {
           <Link href="/dashboard/stock" className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">
             Stock Tracker
           </Link>
+          <Link href="/dashboard/history" className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
+            Assignment History
+          </Link>
           <button onClick={() => setIsAddItemModalOpen(true)} className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
             Add New Item
           </button>

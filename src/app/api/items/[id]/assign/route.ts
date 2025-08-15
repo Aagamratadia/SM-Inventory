@@ -60,6 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       assignedAt: new Date(),
       action: 'assigned',
       quantity: qty,
+      performedBy: (session as any)?.user?.id || (session as any)?.user?._id,
     } as any);
 
     const updatedItem = await itemToAssign.save();
