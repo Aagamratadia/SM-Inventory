@@ -40,12 +40,14 @@ export default async function DashboardLayout({
 
       {/* Main content */}
       <div className="flex flex-col flex-grow min-w-0">
-        <div className="flex items-center justify-between h-16 px-8 bg-white border-b">
-          <div>
-            <h2 className="text-lg font-semibold">Welcome, {session.user?.name}</h2>
-          </div>
-          <div>
-            <SignOutButton />
+        <div className="bg-white border-b">
+          <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Welcome, {session.user?.name}</h2>
+            </div>
+            <div>
+              <SignOutButton />
+            </div>
           </div>
         </div>
         <main className="flex-grow p-8 overflow-auto min-w-0">

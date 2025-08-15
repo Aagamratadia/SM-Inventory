@@ -87,7 +87,7 @@ export default function AssignmentLogPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold">Assignment History</h1>
-        <a href="/dashboard" className="px-4 py-2 text-white bg-gray-600 rounded-md hover:bg-gray-700">Back to Inventory</a>
+        <a href="/dashboard" className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-gray-700">Back to Inventory</a>
       </div>
       <p className="text-sm text-gray-600 mb-6">View who assigned items to whom, with quantities and dates. Use filters to narrow results.</p>
 
@@ -132,7 +132,7 @@ export default function AssignmentLogPage() {
         <div className="md:col-span-4 flex justify-end">
           <button
             onClick={() => { setItemName(''); setCategory(''); setUserId(''); setPerformedBy(''); }}
-            className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded border"
+            className="px-4 py-2 text-sm bg-green-100 hover:bg-gray-200 rounded border"
           >
             Reset Filters
           </button>
