@@ -1,4 +1,4 @@
-import { getServerSession } from 'next-auth/next';
+ import { getServerSession } from 'next-auth/next';
 import { auth as authOptions } from '@/auth.config';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
