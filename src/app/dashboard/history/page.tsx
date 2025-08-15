@@ -25,9 +25,6 @@ export default function AssignmentLogPage() {
   const [category, setCategory] = useState('');
   const [userId, setUserId] = useState('');
   const [performedBy, setPerformedBy] = useState('');
-  const [action, setAction] = useState<'all' | 'assigned' | 'returned'>('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
 
   const [users, setUsers] = useState<{ _id: string; name: string }[]>([]);
   const [items, setItems] = useState<{ name: string; category: string }[]>([]);
@@ -59,9 +56,6 @@ export default function AssignmentLogPage() {
       if (category) sp.set('category', category);
       if (userId) sp.set('userId', userId);
       if (performedBy) sp.set('performedBy', performedBy);
-      if (action !== 'all') sp.set('action', action);
-      if (dateFrom) sp.set('dateFrom', dateFrom);
-      if (dateTo) sp.set('dateTo', dateTo);
 
       const res = await fetch(`/api/assignments?${sp.toString()}`);
       if (!res.ok) {
@@ -84,20 +78,21 @@ export default function AssignmentLogPage() {
   useEffect(() => {
     fetchAssignments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemName, category, userId, performedBy, action, dateFrom, dateTo]);
+  }, [itemName, category, userId, performedBy]);
 
   const itemNames = useMemo(() => Array.from(new Set(items.map((x) => x.name))).sort(), [items]);
   const categories = useMemo(() => Array.from(new Set(items.map((x) => x.category))).sort(), [items]);
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Assignment Log</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-3xl font-bold">Assignment History</h1>
         <a href="/dashboard" className="px-4 py-2 text-white bg-gray-600 rounded-md hover:bg-gray-700">Back to Inventory</a>
       </div>
+      <p className="text-sm text-gray-600 mb-6">View who assigned items to whom, with quantities and dates. Use filters to narrow results.</p>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div>
           <label className="block text-xs text-gray-600 mb-1">Item</label>
           <input list="itemNames" value={itemName} onChange={(e) => setItemName(e.target.value)} placeholder="All" className="w-full px-3 py-2 border rounded-md" />
@@ -126,7 +121,7 @@ export default function AssignmentLogPage() {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-gray-600 mb-1">Performed By</label>
+          <label className="block text-xs text-gray-600 mb-1">Assigned By</label>
           <select value={performedBy} onChange={(e) => setPerformedBy(e.target.value)} className="w-full px-3 py-2 border rounded-md">
             <option value="">All</option>
             {users.map((u) => (
@@ -134,23 +129,13 @@ export default function AssignmentLogPage() {
             ))}
           </select>
         </div>
-        <div>
-          <label className="block text-xs text-gray-600 mb-1">Action</label>
-          <select value={action} onChange={(e) => setAction(e.target.value as any)} className="w-full px-3 py-2 border rounded-md">
-            <option value="all">All</option>
-            <option value="assigned">Assigned</option>
-            <option value="returned">Returned</option>
-          </select>
-        </div>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="block text-xs text-gray-600 mb-1">From</label>
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full px-3 py-2 border rounded-md" />
-          </div>
-          <div className="flex-1">
-            <label className="block text-xs text-gray-600 mb-1">To</label>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full px-3 py-2 border rounded-md" />
-          </div>
+        <div className="md:col-span-4 flex justify-end">
+          <button
+            onClick={() => { setItemName(''); setCategory(''); setUserId(''); setPerformedBy(''); }}
+            className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded border"
+          >
+            Reset Filters
+          </button>
         </div>
       </div>
 
@@ -159,25 +144,27 @@ export default function AssignmentLogPage() {
 
       {!loading && !error && (
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <div className="overflow-x-auto">
+            <div className="max-h-[70vh] overflow-y-auto">
+              <table className="min-w-[1000px] w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performed By</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned By</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
               {rows.map((r, idx) => {
                 const dateStr = r.action === 'assigned' ? r.assignedAt : r.returnedAt;
                 const dateFmt = dateStr ? new Date(dateStr).toLocaleString() : '—';
                 return (
-                  <tr key={idx}>
+                  <tr key={idx} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.itemName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{r.category || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{r.vendorname || '—'}</td>
@@ -195,8 +182,10 @@ export default function AssignmentLogPage() {
                   </tr>
                 );
               })}
-            </tbody>
-          </table>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
     </div>
