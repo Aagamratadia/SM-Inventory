@@ -182,15 +182,15 @@ export default function InventoryPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{(item.totalQuantity || 0) - (item.quantity || 0)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     {(item.quantity || 0) > 0 && (
-                      <button onClick={() => setItemToAssign(item)} className="px-2 py-1 text-xs text-white bg-blue-600 rounded">Assign</button>
+                      <button onClick={() => setItemToAssign(item)} className="px-1.5 py-0.5 text-xs text-white bg-blue-600 rounded">Assign</button>
                     )}
                     {((item.totalQuantity || 0) - (item.quantity || 0)) > 0 && (
-                      <button onClick={() => handleReturnItem(item)} className="px-2 py-1 text-xs text-white bg-yellow-600 rounded">Return</button>
+                      <button onClick={() => handleReturnItem(item)} className="px-1.5 py-0.5 text-xs text-white bg-yellow-600 rounded">Return</button>
                     )}
-                    <Link href={`/dashboard/items/${item._id}`} className="px-2 py-1 text-xs text-white bg-gray-600 rounded">Details</Link>
-                    <button onClick={() => setItemToEdit(item)} className="px-2 py-1 text-xs text-white bg-indigo-600 rounded">Edit</button>
-                    <button onClick={() => setItemToDelete(item)} className="px-2 py-1 text-xs text-white bg-red-600 rounded">Delete</button>
-                    <button onClick={() => toggleHistory(item._id as string)} className="px-2 py-1 text-xs text-white bg-gray-500 rounded">
+                    <Link href={`/dashboard/items/${item._id}`} className="px-1.5 py-0.5 text-xs text-white bg-gray-600 rounded">Details</Link>
+                    <button onClick={() => setItemToEdit(item)} className="px-1.5 py-0.5 text-xs text-white bg-indigo-600 rounded">Edit</button>
+                    <button onClick={() => setItemToDelete(item)} className="px-1.5 py-0.5 text-xs text-white bg-red-600 rounded">Delete</button>
+                    <button onClick={() => toggleHistory(item._id as string)} className="px-1.5 py-0.5 text-xs text-white bg-gray-500 rounded">
                       {expandedItems.has(item._id as string) ? 'Hide History' : 'Show History'}
                     </button>
                   </td>
@@ -218,7 +218,7 @@ export default function InventoryPage() {
                                 <td className="px-3 py-2 whitespace-nowrap text-xs">{assignment.quantity}</td>
                                 <td className="px-3 py-2 whitespace-nowrap text-xs">{new Date(assignment.assignedAt).toLocaleString()}</td>
                                 <td className="px-3 py-2 whitespace-nowrap text-xs">
-                                  <button onClick={() => handleDeleteAssignment(item._id as string, assignment._id as string)} className="px-2 py-1 text-xs text-white bg-red-600 rounded">Delete</button>
+                                  <button onClick={() => handleDeleteAssignment(item._id as string, assignment._id as string)} className="px-1.5 py-0.5 text-xs text-white bg-red-600 rounded">Delete</button>
                                 </td>
                               </tr>
                             ))}
