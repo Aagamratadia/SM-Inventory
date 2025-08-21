@@ -21,6 +21,7 @@ export default function InventoryPage() {
   const [itemToEdit, setItemToEdit] = useState<IItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<IItem | null>(null);
   const [itemToAssign, setItemToAssign] = useState<IItem | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const fetchItems = async () => {
     try {
@@ -83,6 +84,37 @@ export default function InventoryPage() {
     );
   };
 
+  const toggleHistory = (itemId: string) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleDeleteAssignment = async (itemId: string, assignmentId: string) => {
+    if (!confirm('Are you sure you want to delete this assignment entry? This will revert the stock changes.')) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/items/${itemId}/assignments/${assignmentId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to delete assignment');
+      }
+      const updatedItem = await res.json();
+      setItems(prevItems =>
+        prevItems.map(item => (item._id === updatedItem._id ? updatedItem : item))
+      );
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const handleDeleteItem = async () => {
     if (!itemToDelete) return;
     try {
@@ -135,38 +167,70 @@ export default function InventoryPage() {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Quantity</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Quantity</th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredItems.map((item) => (
-              <tr key={item._id as string}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.quantity}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.price ? `₹${item.price.toLocaleString()}` : 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {item.assignedTo ? 
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Assigned</span> : 
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Available</span>
-                  }
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(item.assignedTo as any)?.name || 'Available'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                  {item.assignedTo ? (
-                    <button onClick={() => handleReturnItem(item)} className="px-2 py-1 text-xs text-white bg-yellow-600 rounded">Return</button>
-                  ) : (
-                    <button onClick={() => setItemToAssign(item)} className="px-2 py-1 text-xs text-white bg-blue-600 rounded">Assign</button>
-                  )}
-                  <Link href={`/dashboard/items/${item._id}`} className="px-2 py-1 text-xs text-white bg-gray-600 rounded">Details</Link>
-                  <button onClick={() => setItemToEdit(item)} className="px-2 py-1 text-xs text-white bg-indigo-600 rounded">Edit</button>
-                  <button onClick={() => setItemToDelete(item)} className="px-2 py-1 text-xs text-white bg-red-600 rounded">Delete</button>
-                </td>
-              </tr>
+              <React.Fragment key={item._id as string}>
+                <tr>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.quantity || 0}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{(item.totalQuantity || 0) - (item.quantity || 0)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    {(item.quantity || 0) > 0 && (
+                      <button onClick={() => setItemToAssign(item)} className="px-2 py-1 text-xs text-white bg-blue-600 rounded">Assign</button>
+                    )}
+                    {((item.totalQuantity || 0) - (item.quantity || 0)) > 0 && (
+                      <button onClick={() => handleReturnItem(item)} className="px-2 py-1 text-xs text-white bg-yellow-600 rounded">Return</button>
+                    )}
+                    <Link href={`/dashboard/items/${item._id}`} className="px-2 py-1 text-xs text-white bg-gray-600 rounded">Details</Link>
+                    <button onClick={() => setItemToEdit(item)} className="px-2 py-1 text-xs text-white bg-indigo-600 rounded">Edit</button>
+                    <button onClick={() => setItemToDelete(item)} className="px-2 py-1 text-xs text-white bg-red-600 rounded">Delete</button>
+                    <button onClick={() => toggleHistory(item._id as string)} className="px-2 py-1 text-xs text-white bg-gray-500 rounded">
+                      {expandedItems.has(item._id as string) ? 'Hide History' : 'Show History'}
+                    </button>
+                  </td>
+                </tr>
+                {expandedItems.has(item._id as string) && (
+                  <tr>
+                    <td colSpan={5} className="p-4 bg-gray-50">
+                      <h4 className="font-bold mb-2 text-sm">Assignment History for {item.name}</h4>
+                      {item.assignmentHistory && item.assignmentHistory.length > 0 ? (
+                        <table className="min-w-full divide-y divide-gray-300">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">User</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Action</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Quantity</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Date</th>
+                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {[...item.assignmentHistory].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime()).map(assignment => (
+                              <tr key={assignment._id as string}>
+                                <td className="px-3 py-2 whitespace-nowrap text-xs">{(assignment.user as any)?.name || 'N/A'}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-xs">{assignment.action}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-xs">{assignment.quantity}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-xs">{new Date(assignment.assignedAt).toLocaleString()}</td>
+                                <td className="px-3 py-2 whitespace-nowrap text-xs">
+                                  <button onClick={() => handleDeleteAssignment(item._id as string, assignment._id as string)} className="px-2 py-1 text-xs text-white bg-red-600 rounded">Delete</button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <p className="text-xs text-gray-500">No assignment history for this item.</p>
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>

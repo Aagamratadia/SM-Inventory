@@ -53,8 +53,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Decrement available stock and record assignment entry with quantity
     itemToAssign.quantity = available - qty;
-    // If stock fully assigned to this user, mark assignedTo; otherwise leave null
-    itemToAssign.assignedTo = itemToAssign.quantity === 0 ? userId : null;
+    // If any stock is assigned, mark as assigned to the latest user for simplicity.
+    // A more complex system would track assignments per user.
+    itemToAssign.assignedTo = userId;
     itemToAssign.assignmentHistory.push({
       user: userId,
       assignedAt: new Date(),

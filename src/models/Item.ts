@@ -14,15 +14,20 @@ export interface IItem extends Document {
   category: string; // Added category field
   name: string;
   vendorname?: string;
+  vendorContact?: string;
+  vendorEmail?: string;
+  vendorAddress?: string;
   itemId?: string;
   price?: number;
   // quantity represents AVAILABLE stock
-  quantity?: number;
+  quantity: number;
   // totalQuantity represents TOTAL units ever added (for stock checks)
-  totalQuantity?: number;
+  totalQuantity: number;
   notes?: string;
   assignedTo?: Types.ObjectId;
   assignmentHistory: IAssignment[];
+  isScrap?: boolean;
+  scrappedAt?: Date;
 }
 
 const AssignmentSchema: Schema = new Schema({
@@ -51,8 +56,20 @@ const ItemSchema: Schema = new Schema(
     },
     vendorname: {
       type: String,
-      required: [true, 'Please provide an vendor name.'],
-      unique: true,
+      required: [true, 'Please provide a vendor name.'],
+      trim: true,
+    },
+    vendorContact: {
+      type: String,
+      trim: true,
+    },
+    vendorEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    vendorAddress: {
+      type: String,
       trim: true,
     },
     itemId: { type: String, trim: true },
@@ -65,6 +82,8 @@ const ItemSchema: Schema = new Schema(
     notes: { type: String },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     assignmentHistory: [AssignmentSchema],
+    isScrap: { type: Boolean, default: false },
+    scrappedAt: { type: Date },
   },
   { timestamps: true }
 );

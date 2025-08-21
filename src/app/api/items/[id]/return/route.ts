@@ -53,9 +53,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Increase available stock by qty, capped at total
     itemToReturn.quantity = Math.min(currentAvailable + qty, total);
-    // Capture previous assignee then clear marker
-    const previousAssignee = itemToReturn.assignedTo as any;
-    itemToReturn.assignedTo = null as any;
+    const previousAssignee = itemToReturn.assignedTo;
+    // Only clear assignedTo if all stock is now available
+    if (itemToReturn.quantity === itemToReturn.totalQuantity) {
+      itemToReturn.assignedTo = null;
+    }
     itemToReturn.assignmentHistory.push({
       user: previousAssignee,
       returnedAt: new Date(),

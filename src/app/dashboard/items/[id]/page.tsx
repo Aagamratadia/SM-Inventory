@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { IItem } from '@/models/Item';
+import { Box, Package, DollarSign, User, Calendar, Tag, ClipboardList, ArrowLeft, Building2, Phone, Mail, MapPin } from 'lucide-react';
 
 export default function ItemDetailPage() {
   const [item, setItem] = useState<IItem | null>(null);
@@ -47,86 +48,219 @@ export default function ItemDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <button onClick={() => router.back()} className="mb-6 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
-        &larr; Back to Inventory
-      </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        <button 
+          onClick={() => router.back()} 
+          className="mb-6 px-4 py-2 flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-600 transition-all duration-300"
+        >
+          <ArrowLeft size={18} />
+          Back to Inventory
+        </button>
 
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="p-6 border-b">
-          <h1 className="text-3xl font-bold text-gray-800">{item.name}</h1>
-          <p className="text-lg text-gray-500">Item ID: {item.itemId}</p>
-        </div>
-
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Details</h2>
-            <dl className="space-y-4">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Price</dt>
-                <dd className="mt-1 text-lg text-gray-900">{item.price ? `₹${item.price.toLocaleString()}` : 'N/A'}</dd>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+          <div className="p-6 md:p-8 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-lg">
+                <Package size={32} className="text-white" />
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Status</dt>
-                <dd className="mt-1">
-                  {item.assignedTo ? (
-                    <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800">Assigned</span>
-                  ) : (
-                    <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Available</span>
+                <h1 className="text-3xl font-bold">{item.name}</h1>
+                <p className="text-blue-100 flex items-center gap-2 mt-1">
+                  <Tag size={16} />
+                  <span>ID: {item.itemId || 'N/A'}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Item Details Card */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-200 flex items-center gap-2">
+                <ClipboardList size={20} />
+                Item Details
+              </h2>
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <DollarSign size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Price</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {item.price ? `₹${item.price.toLocaleString()}` : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <Package size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <div className="mt-1">
+                      {item.assignedTo ? (
+                        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800 flex items-center gap-1 w-fit">
+                          Assigned
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 flex items-center gap-1 w-fit">
+                          Available
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {item.assignedTo && (
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <User size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Assigned To</p>
+                      <p className="text-lg font-medium text-gray-900">
+                        {(item.assignedTo as any).name}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {item.notes && (
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <ClipboardList size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Notes</p>
+                      <p className="text-gray-700 mt-1">{item.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Vendor Information Card */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-200 flex items-center gap-2">
+                <Building2 size={20} />
+                Vendor Information
+              </h2>
+              {item.vendorname ? (
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <User size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Vendor Name</p>
+                      <p className="text-lg font-medium text-gray-900">{item.vendorname}</p>
+                    </div>
+                  </div>
+
+                  {item.vendorContact && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <Phone size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Contact</p>
+                        <a 
+                          href={`tel:${item.vendorContact}`} 
+                          className="text-blue-600 hover:underline"
+                        >
+                          {item.vendorContact}
+                        </a>
+                      </div>
+                    </div>
                   )}
-                </dd>
-              </div>
-              {item.assignedTo && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Assigned To</dt>
-                  <dd className="mt-1 text-lg text-gray-900">{(item.assignedTo as any).name}</dd>
+
+                  {item.vendorEmail && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <Mail size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Email</p>
+                        <a 
+                          href={`mailto:${item.vendorEmail}`} 
+                          className="text-blue-600 hover:underline break-all"
+                        >
+                          {item.vendorEmail}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {item.vendorAddress && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <MapPin size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Address</p>
+                        <p className="text-gray-700">{item.vendorAddress}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No vendor information available</p>
                 </div>
               )}
-              {item.notes && (
-                 <div>
-                    <dt className="text-sm font-medium text-gray-500">Notes</dt>
-                    <dd className="mt-1 text-lg text-gray-900">{item.notes}</dd>
-                </div>
-              )}
-            </dl>
+            </div>
           </div>
         </div>
 
-        <div className="p-6 border-t">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Assignment History</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {item.assignmentHistory && item.assignmentHistory.length > 0 ? (
-                  item.assignmentHistory.map((entry, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(entry.user as any)?.name || 'N/A'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`capitalize px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${entry.action === 'assigned' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                          {entry.action}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.quantity ?? 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(entry.assignedAt || entry.returnedAt!).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">No assignment history for this item.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="p-6 md:p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <Calendar size={24} className="text-blue-600" />
+              <span>Assignment History</span>
+            </h2>
+            <div className="space-y-6">
+              {item.assignmentHistory && item.assignmentHistory.length > 0 ? (
+                [...item.assignmentHistory].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime()).map((assignment, index) => (
+                  <div key={index} className="p-5 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-all duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mb-3 sm:mb-0">
+                        <p className="font-semibold text-gray-800 flex items-center gap-2">
+                          <User size={16} className="text-gray-500" />
+                          <span>{(assignment as any).user?.name || 'Unknown User'}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {new Date(assignment.assignedAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">Action</p>
+                          <span
+                            className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                              assignment.action === 'assigned'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                            {assignment.action.charAt(0).toUpperCase() + assignment.action.slice(1)}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">Quantity</p>
+                          <p className="font-semibold text-gray-800">{assignment.quantity}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-10 text-gray-500">
+                  <p>No assignment history found.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
