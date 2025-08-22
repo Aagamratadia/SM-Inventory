@@ -66,10 +66,6 @@ export default function ItemDetailPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold">{item.name}</h1>
-                <p className="text-blue-100 flex items-center gap-2 mt-1">
-                  <Tag size={16} />
-                  <span>ID: {item.itemId || 'N/A'}</span>
-                </p>
               </div>
             </div>
           </div>

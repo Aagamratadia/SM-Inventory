@@ -64,20 +64,6 @@ export default function InventoryPage() {
     );
   };
 
-  const handleReturnItem = async (itemToReturn: IItem) => {
-    try {
-      const res = await fetch(`/api/items/${itemToReturn._id}/return`, { method: 'POST' });
-      if (!res.ok) {
-        throw new Error('Failed to return item');
-      }
-      const updatedItem = await res.json();
-      handleItemAssigned(updatedItem); // reuse update logic
-    } catch (error) {
-      console.error('Failed to return item', error);
-      setError('Failed to return item');
-    }
-  };
-
   const handleItemUpdated = (updatedItem: IItem) => {
     setItems((prevItems) =>
       prevItems.map((item) => (item._id === updatedItem._id ? updatedItem : item))
@@ -183,9 +169,6 @@ export default function InventoryPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     {(item.quantity || 0) > 0 && (
                       <button onClick={() => setItemToAssign(item)} className="px-1.5 py-0.5 text-xs text-white bg-blue-600 rounded">Assign</button>
-                    )}
-                    {((item.totalQuantity || 0) - (item.quantity || 0)) > 0 && (
-                      <button onClick={() => handleReturnItem(item)} className="px-1.5 py-0.5 text-xs text-white bg-yellow-600 rounded">Return</button>
                     )}
                     <Link href={`/dashboard/items/${item._id}`} className="px-1.5 py-0.5 text-xs text-white bg-gray-600 rounded">Details</Link>
                     <button onClick={() => setItemToEdit(item)} className="px-1.5 py-0.5 text-xs text-white bg-indigo-600 rounded">Edit</button>
