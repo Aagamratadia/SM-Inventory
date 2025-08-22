@@ -24,7 +24,7 @@ export interface IItem extends Document {
   // totalQuantity represents TOTAL units ever added (for stock checks)
   totalQuantity: number;
   notes?: string;
-  assignedTo?: Types.ObjectId;
+  assignedTo?: Types.ObjectId | null;
   assignmentHistory: IAssignment[];
   isScrap?: boolean;
   scrappedAt?: Date;
