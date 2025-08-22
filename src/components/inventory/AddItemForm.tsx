@@ -263,9 +263,10 @@ const CATEGORY_ITEMS: Record<string, string[]> = {
 interface AddItemFormProps {
   onSuccess: (newItem: IItem) => void;
   onClose: () => void;
+  isScrap?: boolean;
 }
 
-export default function AddItemForm({ onSuccess, onClose }: AddItemFormProps) {
+export default function AddItemForm({ onSuccess, onClose, isScrap = false }: AddItemFormProps) {
   const [formData, setFormData] = useState({
     category: "",
     name: "",
@@ -302,6 +303,7 @@ export default function AddItemForm({ onSuccess, onClose }: AddItemFormProps) {
         body: JSON.stringify({
           ...formData,
           price: formData.price ? Number(formData.price) : undefined,
+          isScrap,
         }),
       });
 
