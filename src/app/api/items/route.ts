@@ -40,13 +40,30 @@ export async function POST(request: Request) {
     if (!body.name) {
         return NextResponse.json({ message: 'Item name is required' }, { status: 400 });
     }
+    // Enforce required fields: quantity and price
+    const qtyRaw = body.quantity;
+    const priceRaw = body.price;
+    const qtyNum = qtyRaw !== undefined && qtyRaw !== '' ? Number(qtyRaw) : NaN;
+    const priceNum = priceRaw !== undefined && priceRaw !== '' ? Number(priceRaw) : NaN;
+    if (!Number.isFinite(qtyNum)) {
+      return NextResponse.json({ message: 'Quantity is required and must be a number' }, { status: 400 });
+    }
+    if (!Number.isFinite(priceNum)) {
+      return NextResponse.json({ message: 'Price is required and must be a number' }, { status: 400 });
+    }
+    if (qtyNum < 0) {
+      return NextResponse.json({ message: 'Quantity cannot be negative' }, { status: 400 });
+    }
+    if (priceNum < 0) {
+      return NextResponse.json({ message: 'Price cannot be negative' }, { status: 400 });
+    }
 
-    // Normalize quantity fields
-    const qty = body.quantity != null && body.quantity !== '' ? Number(body.quantity) : 0;
+    // Normalize payload
     const payload = {
       ...body,
-      quantity: Number.isFinite(qty) && qty >= 0 ? qty : 0,
-      totalQuantity: Number.isFinite(qty) && qty >= 0 ? qty : 0,
+      quantity: qtyNum,
+      totalQuantity: qtyNum,
+      price: priceNum,
     };
 
     // If vendorname provided, ensure a Vendor exists; create if missing
