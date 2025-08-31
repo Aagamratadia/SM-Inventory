@@ -278,6 +278,17 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Build options for the Item Name select, appending an "Add new item..." option at the end
+  const itemOptions = formData.category
+    ? [
+        ...(CATEGORY_ITEMS[formData.category]?.map((itemName) => ({
+          value: itemName,
+          label: itemName,
+        })) || []),
+        { value: "__ADD_NEW__", label: "Add new item..." },
+      ]
+    : [];
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -365,20 +376,21 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
           name="name"
           isDisabled={!formData.category}
           isSearchable
-          options={
-            formData.category
-              ? CATEGORY_ITEMS[formData.category]?.map((itemName) => ({
-                  value: itemName,
-                  label: itemName,
-                }))
-              : []
-          }
+          options={itemOptions}
           value={
             formData.name
               ? { value: formData.name, label: formData.name }
               : null
           }
           onChange={(option) => {
+            if (option?.value === "__ADD_NEW__") {
+              const input = window.prompt("Enter new item name");
+              const newName = (input || "").trim();
+              if (newName) {
+                setFormData((prev) => ({ ...prev, name: newName }));
+              }
+              return;
+            }
             setFormData((prev) => ({
               ...prev,
               name: option ? option.value : "",
