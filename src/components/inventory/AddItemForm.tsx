@@ -304,6 +304,25 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
       setError("Item name is required.");
       return;
     }
+    // Validate quantity and price
+    const qtyNum = formData.quantity !== "" ? Number(formData.quantity) : NaN;
+    const priceNum = formData.price !== "" ? Number(formData.price) : NaN;
+    if (!Number.isFinite(qtyNum)) {
+      setError("Quantity is required and must be a number.");
+      return;
+    }
+    if (!Number.isFinite(priceNum)) {
+      setError("Price is required and must be a number.");
+      return;
+    }
+    if (qtyNum < 0) {
+      setError("Quantity cannot be negative.");
+      return;
+    }
+    if (priceNum < 0) {
+      setError("Price cannot be negative.");
+      return;
+    }
     setError("");
     setSubmitting(true);
 
@@ -313,7 +332,8 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          price: formData.price ? Number(formData.price) : undefined,
+          quantity: qtyNum,
+          price: priceNum,
           isScrap,
         }),
       });
@@ -340,7 +360,7 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
           htmlFor="category"
           className="block text-sm font-medium text-gray-700"
         >
-          Item Category *
+          Item Category <span className="text-red-600">*</span>
         </label>
         <select
           name="category"
@@ -354,7 +374,7 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
             }));
           }}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         >
           <option value="">Select Category</option>
           {Object.keys(CATEGORY_ITEMS).map((category) => (
@@ -369,7 +389,7 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
           htmlFor="name"
           className="block text-sm font-medium text-gray-700"
         >
-          Item Name *
+          Item Name <span className="text-red-600">*</span>
         </label>
         <Select
           inputId="name"
@@ -407,7 +427,7 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
           htmlFor="name"
           className="block text-sm font-medium text-gray-700"
         >
-          Vendor Name *
+          Vendor Name <span className="text-red-600">*</span>
         </label>
         <input
           type="text"
@@ -420,22 +440,40 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          name="quantity"
-          placeholder="Quantity"
-          value={formData.quantity}
-          onChange={handleChange}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={formData.price}
-          onChange={handleChange}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
-        />
+        <div>
+          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+            Quantity <span className="text-red-600">*</span>
+          </label>
+          <input
+            id="quantity"
+            type="number"
+            name="quantity"
+            placeholder="Quantity"
+            value={formData.quantity}
+            onChange={handleChange}
+            required
+            min={0}
+            step={1}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+          />
+        </div>
+        <div>
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+            Price <span className="text-red-600">*</span>
+          </label>
+          <input
+            id="price"
+            type="number"
+            name="price"
+            placeholder="Price"
+            value={formData.price}
+            onChange={handleChange}
+            required
+            min={0}
+            step={0.01}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+          />
+        </div>
       </div>
       <div>
         <textarea

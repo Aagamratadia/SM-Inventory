@@ -147,8 +147,9 @@ export default function InventoryPage() {
         />
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white shadow-md rounded-lg">
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+          <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
@@ -216,7 +217,8 @@ export default function InventoryPage() {
               </React.Fragment>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       <Modal isOpen={isAddItemModalOpen} onClose={() => setIsAddItemModalOpen(false)} title="Add New Item">
