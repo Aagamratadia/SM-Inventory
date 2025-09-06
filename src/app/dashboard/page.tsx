@@ -9,6 +9,7 @@ import EditItemForm from '@/components/inventory/EditItemForm';
 import AssignItemForm from '@/components/inventory/AssignItemForm';
 import { IItem } from '@/models/Item';
 import Link from 'next/link';
+import { Plus, Search, MoreVertical, UserPlus, ChevronUp } from 'lucide-react';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<IItem[]>([]);
@@ -22,6 +23,7 @@ export default function InventoryPage() {
   const [itemToDelete, setItemToDelete] = useState<IItem | null>(null);
   const [itemToAssign, setItemToAssign] = useState<IItem | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
 
   const fetchItems = async () => {
     try {
@@ -121,102 +123,140 @@ export default function InventoryPage() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Inventory</h1>
-        <div className="flex space-x-4">
-          <Link href="/dashboard/stock" className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700">
-            Stock Tracker
-          </Link>
-          <Link href="/dashboard/history" className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
-            Assignment History
-          </Link>
-          <button onClick={() => setIsAddItemModalOpen(true)} className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-            Add New Item
-          </button>
+    <div className="px-8 pt-4 pb-8 min-h-screen" style={{ backgroundColor: '#F9FAFB' }}>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h1 className="text-3xl font-bold" style={{ color: '#111827' }}>Inventory</h1>
+          <p className="mt-1" style={{ color: '#4B5563' }}>Manage your inventory items and track stock levels</p>
         </div>
+        <button onClick={() => setIsAddItemModalOpen(true)} className="flex items-center px-4 py-2 text-white rounded-md transition-colors duration-200 hover:bg-indigo-700" style={{ backgroundColor: '#6366F1' }}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add New Item
+        </button>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
           placeholder="Search by name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
         />
       </div>
 
-      <div className="bg-white shadow-md rounded-lg">
-        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Quantity</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Quantity</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredItems.map((item) => (
-              <React.Fragment key={item._id as string}>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.category}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.quantity || 0}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{(item.totalQuantity || 0) - (item.quantity || 0)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    {(item.quantity || 0) > 0 && (
-                      <button onClick={() => setItemToAssign(item)} className="px-1.5 py-0.5 text-xs text-white bg-blue-600 rounded">Assign</button>
-                    )}
-                    <Link href={`/dashboard/items/${item._id}`} className="px-1.5 py-0.5 text-xs text-white bg-gray-600 rounded">Details</Link>
-                    <button onClick={() => setItemToEdit(item)} className="px-1.5 py-0.5 text-xs text-white bg-indigo-600 rounded">Edit</button>
-                    <button onClick={() => setItemToDelete(item)} className="px-1.5 py-0.5 text-xs text-white bg-red-600 rounded">Delete</button>
-                    <button onClick={() => toggleHistory(item._id as string)} className="px-1.5 py-0.5 text-xs text-white bg-gray-500 rounded">
-                      {expandedItems.has(item._id as string) ? 'Hide History' : 'Show History'}
-                    </button>
-                  </td>
-                </tr>
-                {expandedItems.has(item._id as string) && (
+      <div className="shadow-md rounded-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead style={{ backgroundColor: '#F9FAFB' }}>
+              <tr>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Name</span>
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Category</span>
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Available Quantity</span>
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Assigned Quantity</span>
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y" style={{ borderColor: '#E5E7EB' }}>
+              {filteredItems.map((item) => (
+                <React.Fragment key={item._id as string}>
                   <tr>
-                    <td colSpan={5} className="p-4 bg-gray-50">
-                      <h4 className="font-bold mb-2 text-sm">Assignment History for {item.name}</h4>
-                      {item.assignmentHistory && item.assignmentHistory.length > 0 ? (
-                        <table className="min-w-full divide-y divide-gray-300">
-                          <thead className="bg-gray-100">
-                            <tr>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">User</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Action</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Quantity</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Date</th>
-                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {[...item.assignmentHistory].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime()).map(assignment => (
-                              <tr key={assignment._id as string}>
-                                <td className="px-3 py-2 whitespace-nowrap text-xs">{(assignment.user as any)?.name || 'N/A'}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-xs">{assignment.action}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-xs">{assignment.quantity}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-xs">{new Date(assignment.assignedAt).toLocaleString()}</td>
-                                <td className="px-3 py-2 whitespace-nowrap text-xs">
-                                  <button onClick={() => handleDeleteAssignment(item._id as string, assignment._id as string)} className="px-1.5 py-0.5 text-xs text-white bg-red-600 rounded">Delete</button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <p className="text-xs text-gray-500">No assignment history for this item.</p>
-                      )}
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{item.name}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm">
+                      <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
+                        {item.category}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{item.quantity || 0}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{(item.totalQuantity || 0) - (item.quantity || 0)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        {(item.quantity || 0) > 0 && (
+                          <button onClick={() => setItemToAssign(item)} className="flex items-center px-3 py-1.5 text-xs text-white rounded-md transition-colors hover:bg-indigo-700" style={{ backgroundColor: '#6366F1' }}>
+                            <UserPlus className="w-4 h-4 mr-1.5" />
+                            Assign
+                          </button>
+                        )}
+                        <div className="relative">
+                          <button onClick={() => setActiveActionMenu(activeActionMenu === item._id ? null : item._id as string)} className="p-2 rounded-full hover:bg-gray-100">
+                            <MoreVertical className="w-5 h-5 text-gray-500" />
+                          </button>
+                          {activeActionMenu === item._id && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 ring-1 ring-black ring-opacity-5">
+                              <div className="py-1">
+                                <Link href={`/dashboard/items/${item._id}`} className="block px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>Details</Link>
+                                <button onClick={() => { setItemToEdit(item); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>Edit</button>
+                                <button onClick={() => { setItemToDelete(item); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50" style={{ color: '#DC2626' }}>Delete</button>
+                                <button onClick={() => { toggleHistory(item._id as string); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>
+                                  {expandedItems.has(item._id as string) ? 'Hide History' : 'Show History'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
+                  {expandedItems.has(item._id as string) && (
+                    <tr>
+                      <td colSpan={5} className="p-4" style={{ backgroundColor: '#F9FAFB' }}>
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleHistory(item._id as string)}
+                            className="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-100"
+                            title="Collapse"
+                            aria-label="Collapse history"
+                          >
+                            <ChevronUp className="w-4 h-4" style={{ color: '#4B5563' }} />
+                          </button>
+                          <h4 className="font-bold mb-2 pr-8 text-sm" style={{ color: '#111827' }}>Assignment History for {item.name}</h4>
+                        {item.assignmentHistory && item.assignmentHistory.length > 0 ? (
+                          <table className="min-w-full divide-y" style={{ borderColor: '#E5E7EB' }}>
+                            <thead style={{ backgroundColor: '#F9FAFB' }}>
+                              <tr>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>User</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Action</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Quantity</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Date</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y" style={{ borderColor: '#E5E7EB' }}>
+                              {[...item.assignmentHistory].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime()).map(assignment => (
+                                <tr key={assignment._id as string}>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{(assignment.user as any)?.name || 'N/A'}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{assignment.action}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{assignment.quantity}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{new Date(assignment.assignedAt).toLocaleString()}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs">
+                                    <button onClick={() => handleDeleteAssignment(item._id as string, assignment._id as string)} className="px-1.5 py-0.5 text-xs text-white rounded" style={{ backgroundColor: '#DC2626' }}>Delete</button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <p className="text-xs" style={{ color: '#4B5563' }}>No assignment history for this item.</p>
+                        )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
@@ -248,15 +288,13 @@ export default function InventoryPage() {
         </Modal>
       )}
 
-      {/* Removed Return modal and Import modal */}
-
       {itemToDelete && (
         <Modal isOpen={!!itemToDelete} onClose={() => setItemToDelete(null)} title="Delete Item">
           <div className="text-center">
-            <p>Are you sure you want to delete <strong>{itemToDelete.name}</strong>?</p>
+            <p style={{ color: '#111827' }}>Are you sure you want to delete <strong>{itemToDelete.name}</strong>?</p>
             <div className="mt-6 flex justify-center space-x-4">
-              <button onClick={() => setItemToDelete(null)} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-              <button onClick={handleDeleteItem} className="px-4 py-2 text-white bg-red-600 rounded">Delete</button>
+              <button onClick={() => setItemToDelete(null)} className="px-4 py-2 rounded" style={{ backgroundColor: '#E5E7EB', color: '#4B5563' }}>Cancel</button>
+              <button onClick={handleDeleteItem} className="px-4 py-2 text-white rounded" style={{ backgroundColor: '#DC2626' }}>Delete</button>
             </div>
           </div>
         </Modal>

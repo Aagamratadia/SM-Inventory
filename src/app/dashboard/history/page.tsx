@@ -84,10 +84,10 @@ export default function AssignmentLogPage() {
   const categories = useMemo(() => Array.from(new Set(items.map((x) => x.category))).sort(), [items]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'transparent' }}>
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-3xl font-bold">Assignment History</h1>
-        <a href="/dashboard" className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-gray-700">Back to Inventory</a>
+        <h1 className="text-3xl font-bold" style={{ color: '#111827' }}>Assignment History</h1>
+        <a href="/dashboard" className="px-4 py-2 rounded-md border hover:bg-gray-50 transition-colors" style={{ color: '#4B5563', borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>Back to Inventory</a>
       </div>
       <p className="text-sm text-gray-600 mb-6">View who assigned items to whom, with quantities and dates. Use filters to narrow results.</p>
 
@@ -132,7 +132,8 @@ export default function AssignmentLogPage() {
         <div className="md:col-span-4 flex justify-end">
           <button
             onClick={() => { setItemName(''); setCategory(''); setUserId(''); setPerformedBy(''); }}
-            className="px-4 py-2 text-sm bg-green-100 hover:bg-gray-200 rounded border"
+            className="px-4 py-2 text-sm text-white rounded-md transition-colors hover:bg-indigo-700"
+            style={{ backgroundColor: '#6366F1' }}
           >
             Reset Filters
           </button>
@@ -146,20 +147,20 @@ export default function AssignmentLogPage() {
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <div className="max-h-[70vh] overflow-y-auto">
-              <table className="min-w-[1000px] w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0 z-10">
+              <table className="min-w-[1000px] w-full divide-y" style={{ borderColor: '#E5E7EB' }}>
+                <thead className="sticky top-0 z-10" style={{ backgroundColor: '#F9FAFB' }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned By</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Item</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Category</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Vendor</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Assigned To</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Assigned By</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Action</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Quantity</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Date</th>
               </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y" style={{ borderColor: '#E5E7EB' }}>
               {rows.map((r, idx) => {
                 const dateStr = r.action === 'assigned' ? r.assignedAt : r.returnedAt;
                 const dateFmt = dateStr ? new Date(dateStr).toLocaleString() : '—';
@@ -171,12 +172,10 @@ export default function AssignmentLogPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{r.user?.name || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{r.performedBy?.name || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {r.action === 'assigned' ? (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Assigned</span>
-                      ) : (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Returned</span>
-                      )}
-                    </td>
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
+                      {r.action === 'assigned' ? 'Assigned' : 'Returned'}
+                    </span>
+                  </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.quantity}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{dateFmt}</td>
                   </tr>

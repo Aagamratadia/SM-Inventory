@@ -48,61 +48,62 @@ export default function ItemDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8" style={{ backgroundColor: '#F9FAFB' }}>
       <div className="max-w-6xl mx-auto">
-        <button 
-          onClick={() => router.back()} 
-          className="mb-6 px-4 py-2 flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-600 transition-all duration-300"
+        <button
+          onClick={() => router.back()}
+          className="mb-6 px-4 py-2 flex items-center gap-2 text-sm font-medium rounded-md border hover:bg-gray-50 transition-colors"
+          style={{ color: '#4B5563', borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}
         >
           <ArrowLeft size={18} />
           Back to Inventory
         </button>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-          <div className="p-6 md:p-8 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+          <div className="p-6 md:p-8" style={{ backgroundColor: '#FFFFFF', color: '#111827' }}>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <Package size={32} className="text-white" />
+              <div className="p-3 rounded-lg" style={{ backgroundColor: '#F3F4F6' }}>
+                <Package size={32} className="text-gray-700" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">{item.name}</h1>
+                <h1 className="text-3xl font-bold" style={{ color: '#111827' }}>{item.name}</h1>
               </div>
             </div>
           </div>
 
           <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Item Details Card */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+            <div className="p-6 rounded-xl border" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
               <h2 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-200 flex items-center gap-2">
                 <ClipboardList size={20} />
                 Item Details
               </h2>
               <div className="space-y-5">
                 <div className="flex items-start gap-4">
-                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                  <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                     <DollarSign size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Price</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Price</p>
+                    <p className="text-lg font-semibold" style={{ color: '#111827' }}>
                       {item.price ? `₹${item.price.toLocaleString()}` : 'N/A'}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                  <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                     <Package size={20} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Status</p>
                     <div className="mt-1">
                       {item.assignedTo ? (
-                        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800 flex items-center gap-1 w-fit">
+                        <span className="px-3 py-1 text-sm font-semibold rounded-full w-fit" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
                           Assigned
                         </span>
                       ) : (
-                        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 flex items-center gap-1 w-fit">
+                        <span className="px-3 py-1 text-sm font-semibold rounded-full w-fit" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
                           Available
                         </span>
                       )}
@@ -112,12 +113,12 @@ export default function ItemDetailPage() {
 
                 {item.assignedTo && (
                   <div className="flex items-start gap-4">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                       <User size={20} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Assigned To</p>
-                      <p className="text-lg font-medium text-gray-900">
+                      <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Assigned To</p>
+                      <p className="text-lg font-medium" style={{ color: '#111827' }}>
                         {(item.assignedTo as any).name}
                       </p>
                     </div>
@@ -126,12 +127,12 @@ export default function ItemDetailPage() {
 
                 {item.notes && (
                   <div className="flex items-start gap-4">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                       <ClipboardList size={20} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Notes</p>
-                      <p className="text-gray-700 mt-1">{item.notes}</p>
+                      <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Notes</p>
+                      <p className="mt-1" style={{ color: '#111827' }}>{item.notes}</p>
                     </div>
                   </div>
                 )}
@@ -139,7 +140,7 @@ export default function ItemDetailPage() {
             </div>
 
             {/* Vendor Information Card */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+            <div className="p-6 rounded-xl border" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
               <h2 className="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b border-gray-200 flex items-center gap-2">
                 <Building2 size={20} />
                 Vendor Information
@@ -147,26 +148,23 @@ export default function ItemDetailPage() {
               {item.vendorname ? (
                 <div className="space-y-5">
                   <div className="flex items-start gap-4">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                       <User size={20} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Vendor Name</p>
-                      <p className="text-lg font-medium text-gray-900">{item.vendorname}</p>
+                      <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Vendor Name</p>
+                      <p className="text-lg font-medium" style={{ color: '#111827' }}>{item.vendorname}</p>
                     </div>
                   </div>
 
                   {item.vendorContact && (
                     <div className="flex items-start gap-4">
-                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                         <Phone size={20} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Contact</p>
-                        <a 
-                          href={`tel:${item.vendorContact}`} 
-                          className="text-blue-600 hover:underline"
-                        >
+                        <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Contact</p>
+                        <a href={`tel:${item.vendorContact}`} className="hover:underline" style={{ color: '#4B5563' }}>
                           {item.vendorContact}
                         </a>
                       </div>
@@ -175,15 +173,12 @@ export default function ItemDetailPage() {
 
                   {item.vendorEmail && (
                     <div className="flex items-start gap-4">
-                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                         <Mail size={20} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Email</p>
-                        <a 
-                          href={`mailto:${item.vendorEmail}`} 
-                          className="text-blue-600 hover:underline break-all"
-                        >
+                        <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Email</p>
+                        <a href={`mailto:${item.vendorEmail}`} className="hover:underline break-all" style={{ color: '#4B5563' }}>
                           {item.vendorEmail}
                         </a>
                       </div>
@@ -192,12 +187,12 @@ export default function ItemDetailPage() {
 
                   {item.vendorAddress && (
                     <div className="flex items-start gap-4">
-                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                         <MapPin size={20} />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Address</p>
-                        <p className="text-gray-700">{item.vendorAddress}</p>
+                        <p className="text-sm font-medium" style={{ color: '#4B5563' }}>Address</p>
+                        <p style={{ color: '#111827' }}>{item.vendorAddress}</p>
                       </div>
                     </div>
                   )}
@@ -213,39 +208,36 @@ export default function ItemDetailPage() {
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-              <Calendar size={24} className="text-blue-600" />
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: '#111827' }}>
+              <Calendar size={24} className="text-gray-600" />
               <span>Assignment History</span>
             </h2>
             <div className="space-y-6">
               {item.assignmentHistory && item.assignmentHistory.length > 0 ? (
-                [...item.assignmentHistory].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime()).map((assignment, index) => (
-                  <div key={index} className="p-5 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-50 transition-all duration-300">
+                [...item.assignmentHistory]
+                  .sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime())
+                  .map((assignment, index) => (
+                  <div key={index} className="p-5 rounded-lg border transition-colors" style={{ borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                       <div className="mb-3 sm:mb-0">
-                        <p className="font-semibold text-gray-800 flex items-center gap-2">
+                        <p className="font-semibold flex items-center gap-2" style={{ color: '#111827' }}>
                           <User size={16} className="text-gray-500" />
                           <span>{(assignment as any).user?.name || 'Unknown User'}</span>
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm mt-1" style={{ color: '#4B5563' }}>
                           {new Date(assignment.assignedAt).toLocaleString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-sm text-gray-500">Action</p>
-                          <span
-                            className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                              assignment.action === 'assigned'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-blue-100 text-blue-800'
-                            }`}>
+                          <p className="text-sm" style={{ color: '#4B5563' }}>Action</p>
+                          <span className="px-3 py-1 text-xs font-semibold rounded-full" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
                             {assignment.action.charAt(0).toUpperCase() + assignment.action.slice(1)}
                           </span>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-500">Quantity</p>
-                          <p className="font-semibold text-gray-800">{assignment.quantity}</p>
+                          <p className="text-sm" style={{ color: '#4B5563' }}>Quantity</p>
+                          <p className="font-semibold" style={{ color: '#111827' }}>{assignment.quantity}</p>
                         </div>
                       </div>
                     </div>

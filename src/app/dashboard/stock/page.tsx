@@ -81,23 +81,24 @@ export default function StockTrackerPage() {
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
   return (
-    <div>
+    <div className="p-6" style={{ backgroundColor: '#F9FAFB' }}>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Stock Tracker</h1>
+        <h1 className="text-3xl font-bold" style={{ color: '#111827' }}>Stock Tracker</h1>
         <div className="flex items-center space-x-4">
           <button
             onClick={handleFixTotals}
             disabled={fixerStatus.loading}
-            className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-300"
+            className="px-4 py-2 text-white rounded-md transition-colors disabled:opacity-70"
+            style={{ backgroundColor: '#6366F1' }}
           >
             {fixerStatus.loading ? 'Fixing...' : 'Fix Inconsistent Totals'}
           </button>
-          <Link href="/dashboard" className="px-4 py-2 text-white bg-gray-600 rounded-md hover:bg-gray-700">Back to Inventory</Link>
+          <Link href="/dashboard" className="px-4 py-2 rounded-md border hover:bg-gray-50 transition-colors" style={{ color: '#4B5563', borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>Back to Inventory</Link>
         </div>
       </div>
 
       {fixerStatus.message && (
-        <div className={`p-4 mb-4 text-sm rounded-lg ${fixerStatus.message.includes('Failed') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        <div className="p-4 mb-4 text-sm rounded-lg" style={{ backgroundColor: '#F9FAFB', color: fixerStatus.message.includes('Failed') ? '#DC2626' : '#4B5563' }}>
           {fixerStatus.message}
         </div>
       )}
@@ -109,26 +110,27 @@ export default function StockTrackerPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
         />
       </div>
 
       <div className="bg-white shadow-md rounded-lg">
         <div className="overflow-x-auto">
-          <table className="w-max min-w-[1100px] divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <table className="w-max min-w-[1100px] divide-y" style={{ borderColor: '#E5E7EB' }}>
+          <thead style={{ backgroundColor: '#F9FAFB' }}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Added</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Value</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consistency</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Name</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Category</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Vendor</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Unit Price</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Available</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Assigned</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Total Added</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Total Value</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>Consistency</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y" style={{ borderColor: '#E5E7EB' }}>
             {filtered.map((item: any) => {
               const { available, assigned, total, isConsistent, unitPrice, valueAvailable } = computeTotals(item);
               const fmtCurrency = (n: number | undefined) =>
@@ -147,11 +149,11 @@ export default function StockTrackerPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmtCurrency(valueAvailable)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {isConsistent ? (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
                         Consistent
                       </span>
                     ) : (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
                         Inconsistent
                       </span>
                     )}
