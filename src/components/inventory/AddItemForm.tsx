@@ -327,7 +327,8 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
     setSubmitting(true);
 
     try {
-      const res = await fetch("/api/items", {
+      const url = isScrap ? "/api/items/scrap" : "/api/items";
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -343,7 +344,24 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
         throw new Error(errorData.message || "Failed to create item");
       }
 
-      const newItem = await res.json();
+      const data = await res.json();
+      const newItem = isScrap
+        ? (data && data._id
+            ? data
+            : // Fallback if API returned { results: [...] }
+              {
+                _id: data?.results?.[0]?.id,
+                category: formData.category,
+                name: formData.name,
+                vendorname: formData.vendorname,
+                quantity: qtyNum,
+                totalQuantity: qtyNum,
+                price: priceNum,
+                notes: formData.notes,
+                isScrap: true,
+                scrappedAt: new Date().toISOString(),
+              } as unknown as IItem)
+        : data;
       onSuccess(newItem);
       onClose();
     } catch (err: any) {
@@ -459,13 +477,13 @@ export default function AddItemForm({ onSuccess, onClose, isScrap = false }: Add
         </div>
         <div>
           <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-            Price <span className="text-red-600">*</span>
+            Unit Price <span className="text-red-600">*</span>
           </label>
           <input
             id="price"
             type="number"
             name="price"
-            placeholder="Price"
+            placeholder="Unit Price"
             value={formData.price}
             onChange={handleChange}
             required

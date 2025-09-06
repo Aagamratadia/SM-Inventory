@@ -4,6 +4,7 @@ import Item from '@/models/Item';
 
 export async function GET() {
   await dbConnect();
+  try { await Item.syncIndexes(); } catch (e) { console.warn('Item.syncIndexes SCRAP GET warning:', e); }
 
   try {
     const scrapItems = await Item.find({ isScrap: true }).sort({ scrappedAt: -1 });
@@ -16,6 +17,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   await dbConnect();
+  try { await Item.syncIndexes(); } catch (e) { console.warn('Item.syncIndexes SCRAP POST warning:', e); }
 
   try {
     const body = await request.json();
@@ -27,6 +29,7 @@ export async function POST(request: Request) {
     }
 
     const results = [] as any[];
+    let singleDoc: any = null;
     for (const raw of items) {
       // Normalize and enforce scrap fields
       const name = raw?.name?.trim();
@@ -57,16 +60,21 @@ export async function POST(request: Request) {
 
       try {
         const doc = await Item.findOneAndUpdate(
-          { category, name },
+          { category, name, isScrap: true },
           { $set: payload },
           { upsert: true, new: true, setDefaultsOnInsert: true }
         );
         results.push({ ok: true, id: doc._id, name: doc.name });
+        singleDoc = doc;
       } catch (e: any) {
         results.push({ ok: false, error: e?.message || String(e), input: raw });
       }
     }
 
+    // If a single item was posted, return the full document directly for convenience
+    if (items.length === 1 && results.length === 1 && results[0].ok && singleDoc) {
+      return NextResponse.json(singleDoc);
+    }
     return NextResponse.json({ results });
   } catch (error) {
     console.error('Error inserting scrap items:', error);

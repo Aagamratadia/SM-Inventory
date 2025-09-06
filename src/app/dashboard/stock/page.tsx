@@ -9,6 +9,7 @@ function computeTotals(item: any) {
   const available = Number(item?.quantity ?? 0);
   let total: number | undefined = item?.totalQuantity;
   let isConsistent = false;
+  const unitPrice = Number(item?.price ?? 0);
 
   const hist = Array.isArray(item?.assignmentHistory) ? item.assignmentHistory : [];
   const netAssignedFromHist = hist.reduce((acc: number, h: any) => {
@@ -29,7 +30,8 @@ function computeTotals(item: any) {
   }
 
   const assigned = Math.max((total as number) - available, 0);
-  return { available, assigned, total: total as number, isConsistent };
+  const valueAvailable = Number.isFinite(unitPrice) ? available * unitPrice : undefined;
+  return { available, assigned, total: total as number, isConsistent, unitPrice, valueAvailable };
 }
 
 export default function StockTrackerPage() {
@@ -110,30 +112,39 @@ export default function StockTrackerPage() {
         />
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="bg-white shadow-md rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="w-max min-w-[1100px] divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Added</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Value</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consistency</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filtered.map((item: any) => {
-              const { available, assigned, total, isConsistent } = computeTotals(item);
+              const { available, assigned, total, isConsistent, unitPrice, valueAvailable } = computeTotals(item);
+              const fmtCurrency = (n: number | undefined) =>
+                typeof n === 'number' && Number.isFinite(n)
+                  ? n.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 })
+                  : '—';
               return (
                 <tr key={item._id as string}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.category}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{item.vendorname || '—'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmtCurrency(unitPrice)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{available}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{assigned}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{total}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{fmtCurrency(valueAvailable)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {isConsistent ? (
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -149,7 +160,8 @@ export default function StockTrackerPage() {
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );

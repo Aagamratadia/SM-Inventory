@@ -50,7 +50,6 @@ const ItemSchema: Schema = new Schema(
     name: {
       type: String,
       required: [true, 'Please provide an item name.'],
-      unique: true,
       trim: true,
     },
     vendorname: {
@@ -89,6 +88,9 @@ const ItemSchema: Schema = new Schema(
 
 // Non-unique index to speed up category queries
 ItemSchema.index({ category: 1 }, { name: 'category_1' });
+
+// Ensure names are unique only within the same category and scrap flag
+ItemSchema.index({ category: 1, name: 1, isScrap: 1 }, { unique: true, name: 'uniq_category_name_scrap' });
 
 // In Next.js dev, the model may be cached with an old schema. Delete to force recompile.
 if (mongoose.models.Item) {
