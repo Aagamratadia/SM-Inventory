@@ -16,7 +16,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     await dbConnect();
     const item = await Item.findById(id)
       .populate('assignedTo', 'name email')
-      .populate('assignmentHistory.user', 'name email');
+      .populate('assignmentHistory.user', 'name email')
+      .populate('stockAdditions.performedBy', 'name email');
       
     if (!item) {
       return NextResponse.json({ message: 'Item not found' }, { status: 404 });
