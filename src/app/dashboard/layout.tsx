@@ -1,8 +1,9 @@
- import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth/next';
 import { auth as authOptions } from '@/auth.config';
 import { redirect } from 'next/navigation';
 import UserMenu from '@/components/auth/UserMenu';
 import Sidebar from '@/components/dashboard/Sidebar';
+import Image from 'next/image';
 
 export default async function DashboardLayout({
   children,
@@ -19,8 +20,17 @@ export default async function DashboardLayout({
     <div className="flex h-screen" style={{ backgroundColor: '#F9FAFB' }}>
       {/* Sidebar */}
       <div className="hidden md:flex flex-col w-60 flex-none bg-white border-r">
-        <div className="flex items-center justify-center h-16 border-b">
-          <h1 className="text-2xl font-bold" style={{ color: '#6366F1' }}>SM Inventory</h1>
+        <div className="border-b">
+          <div className="relative w-full h-24 md:h-28">{/* Reduced height */}
+            <Image
+              src="/Logo2.jpg"
+              alt="SM Inventory Logo"
+              fill
+              priority
+              sizes="240px"
+              className="object-contain object-center px-2 py-1"
+            />
+          </div>
         </div>
         <Sidebar />
       </div>

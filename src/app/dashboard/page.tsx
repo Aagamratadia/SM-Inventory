@@ -26,6 +26,14 @@ export default function InventoryPage() {
   const [itemToAssign, setItemToAssign] = useState<IItem | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [activeActionMenu, setActiveActionMenu] = useState<string | null>(null);
+  const [itemToAddStock, setItemToAddStock] = useState<IItem | null>(null);
+  const [addStockQty, setAddStockQty] = useState<string>('');
+  const [addingStock, setAddingStock] = useState(false);
+  const [addStockError, setAddStockError] = useState<string>('');
+  const [addStockPrice, setAddStockPrice] = useState<string>('');
+  const [addStockNote, setAddStockNote] = useState<string>('');
+  const [addStockVendor, setAddStockVendor] = useState<string>('');
+  const [vendorNames, setVendorNames] = useState<string[]>([]);
 
   const fetchItems = async () => {
     try {
@@ -116,6 +124,59 @@ export default function InventoryPage() {
     }
   };
 
+  const handleSubmitAddStock = async () => {
+    if (!itemToAddStock) return;
+    const qtyNum = Number(addStockQty);
+    if (!Number.isFinite(qtyNum) || qtyNum <= 0) {
+      setAddStockError('Enter a valid quantity greater than 0');
+      return;
+    }
+    try {
+      setAddingStock(true);
+      setAddStockError('');
+      const res = await fetch(`/api/items/${itemToAddStock._id}/add-stock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quantity: qtyNum,
+          price: addStockPrice !== '' ? Number(addStockPrice) : undefined,
+          note: addStockNote || undefined,
+          vendorName: addStockVendor || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || 'Failed to add stock');
+      }
+      setItems(prev => prev.map(it => (it._id === data._id ? data : it)));
+      setFilteredItems(prev => prev.map(it => (it._id === data._id ? data : it)));
+      setItemToAddStock(null);
+      setAddStockQty('');
+      setAddStockPrice('');
+      setAddStockNote('');
+      setAddStockVendor('');
+    } catch (e: any) {
+      setAddStockError(e.message || 'Failed to add stock');
+    } finally {
+      setAddingStock(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadVendors = async () => {
+      try {
+        const r = await fetch('/api/vendors');
+        if (!r.ok) return;
+        const data = await r.json();
+        const names = Array.isArray(data) ? data.map((v: any) => v.name).filter(Boolean) : [];
+        setVendorNames(names);
+      } catch {}
+    };
+    if (itemToAddStock) {
+      loadVendors();
+    }
+  }, [itemToAddStock]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -178,11 +239,17 @@ export default function InventoryPage() {
               {filteredItems.map((item) => (
                 <React.Fragment key={item._id as string}>
                   <tr>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{item.name}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>
+                      <Link href={`/dashboard/items/${item._id}`} className="hover:underline">
+                        {item.name}
+                      </Link>
+                    </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm">
-                      <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
-                        {item.category}
-                      </span>
+                      <Link href={`/dashboard/items/${item._id}`} className="inline-block">
+                        <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full hover:underline" style={{ backgroundColor: '#F9FAFB', color: '#4B5563' }}>
+                          {item.category}
+                        </span>
+                      </Link>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{item.quantity || 0}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{(item as any).reserved || 0}</td>
@@ -211,10 +278,11 @@ export default function InventoryPage() {
                               <div className="py-1">
                                 <Link href={`/dashboard/items/${item._id}`} className="block px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>Details</Link>
                                 <button onClick={() => { setItemToEdit(item); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>Edit</button>
-                                <button onClick={() => { setItemToDelete(item); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50" style={{ color: '#DC2626' }}>Delete</button>
+                                <button onClick={() => { setItemToAddStock(item); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>Add Stock</button>
                                 <button onClick={() => { toggleHistory(item._id as string); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" style={{ color: '#4B5563' }}>
                                   {expandedItems.has(item._id as string) ? 'Hide History' : 'Show History'}
                                 </button>
+                                <button onClick={() => { setItemToDelete(item); setActiveActionMenu(null); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-red-50" style={{ color: '#DC2626' }}>Delete</button>
                               </div>
                             </div>
                           )}
@@ -300,6 +368,70 @@ export default function InventoryPage() {
                 onItemAssigned={handleItemAssigned}
                 onClose={() => setItemToAssign(null)}
             />
+        </Modal>
+      )}
+
+      {itemToAddStock && (
+        <Modal isOpen={!!itemToAddStock} onClose={() => { setItemToAddStock(null); setAddStockQty(''); setAddStockError(''); setAddStockPrice(''); setAddStockNote(''); setAddStockVendor(''); }} title={`Add Stock: ${itemToAddStock.name}`}>
+          <div>
+            <label className="block text-sm mb-2" style={{ color: '#4B5563' }}>Quantity to add</label>
+            <input
+              type="number"
+              min={1}
+              value={addStockQty}
+              onChange={(e) => setAddStockQty(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
+            />
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-2" style={{ color: '#4B5563' }}>New Unit Price (optional)</label>
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={addStockPrice}
+                  onChange={(e) => setAddStockPrice(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-2" style={{ color: '#4B5563' }}>Note (optional)</label>
+                <input
+                  type="text"
+                  value={addStockNote}
+                  onChange={(e) => setAddStockNote(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm mb-2" style={{ color: '#4B5563' }}>Vendor (optional)</label>
+              <input
+                type="text"
+                list="vendors-list"
+                value={addStockVendor}
+                onChange={(e) => setAddStockVendor(e.target.value)}
+                placeholder="Select or type vendor name"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
+              />
+              <datalist id="vendors-list">
+                {vendorNames.map((v) => (
+                  <option key={v} value={v} />
+                ))}
+              </datalist>
+            </div>
+            {addStockError && (
+              <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{addStockError}</p>
+            )}
+            <div className="mt-4 flex justify-end space-x-3">
+              <button onClick={() => { setItemToAddStock(null); setAddStockQty(''); setAddStockError(''); setAddStockPrice(''); setAddStockNote(''); setAddStockVendor(''); }} className="px-4 py-2 rounded" style={{ backgroundColor: '#E5E7EB', color: '#4B5563' }}>Cancel</button>
+              <button onClick={handleSubmitAddStock} disabled={addingStock} className="px-4 py-2 text-white rounded disabled:opacity-70" style={{ backgroundColor: '#6366F1' }}>{addingStock ? 'Adding...' : 'Add'}</button>
+            </div>
+          </div>
         </Modal>
       )}
 

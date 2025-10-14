@@ -91,6 +91,21 @@ export default function ItemDetailPage() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 rounded-lg border" style={{ borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
+                    <p className="text-xs" style={{ color: '#4B5563' }}>Available</p>
+                    <p className="text-xl font-bold" style={{ color: '#111827' }}>{item.quantity ?? 0}</p>
+                  </div>
+                  <div className="p-3 rounded-lg border" style={{ borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
+                    <p className="text-xs" style={{ color: '#4B5563' }}>Assigned</p>
+                    <p className="text-xl font-bold" style={{ color: '#111827' }}>{Math.max((item.totalQuantity || 0) - (item.quantity || 0), 0)}</p>
+                  </div>
+                  <div className="p-3 rounded-lg border" style={{ borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
+                    <p className="text-xs" style={{ color: '#4B5563' }}>Total Added</p>
+                    <p className="text-xl font-bold" style={{ color: '#111827' }}>{item.totalQuantity ?? 0}</p>
+                  </div>
+                </div>
+
                 <div className="flex items-start gap-4">
                   <div className="p-2 rounded-lg" style={{ backgroundColor: '#F3F4F6', color: '#4B5563' }}>
                     <Package size={20} />
@@ -200,6 +215,64 @@ export default function ItemDetailPage() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>No vendor information available</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+          <div className="p-6 md:p-8">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: '#111827' }}>
+              <Package size={24} className="text-gray-600" />
+              <span>Stock Additions</span>
+            </h2>
+            <div className="space-y-4">
+              {item.stockAdditions && item.stockAdditions.length > 0 ? (
+                [...item.stockAdditions]
+                  .sort((a: any, b: any) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
+                  .map((entry: any, idx: number) => (
+                    <div key={idx} className="p-4 rounded-lg border" style={{ borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' }}>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div>
+                            <p className="text-sm" style={{ color: '#4B5563' }}>Added By</p>
+                            <p className="font-semibold" style={{ color: '#111827' }}>{entry.performedBy?.name || 'System'}</p>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <div className="text-right">
+                              <p className="text-sm" style={{ color: '#4B5563' }}>Quantity</p>
+                              <p className="font-semibold" style={{ color: '#111827' }}>{entry.quantity}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm" style={{ color: '#4B5563' }}>Date</p>
+                              <p className="font-semibold" style={{ color: '#111827' }}>{new Date(entry.addedAt).toLocaleString()}</p>
+                            </div>
+                            {typeof entry.priceAtAddition === 'number' && (
+                              <div className="text-right">
+                                <p className="text-sm" style={{ color: '#4B5563' }}>Price</p>
+                                <p className="font-semibold" style={{ color: '#111827' }}>₹{Number(entry.priceAtAddition).toLocaleString()}</p>
+                              </div>
+                            )}
+                            {entry.vendorName && (
+                              <div className="text-right">
+                                <p className="text-sm" style={{ color: '#4B5563' }}>Vendor</p>
+                                <p className="font-semibold" style={{ color: '#111827' }}>{entry.vendorName}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {entry.note && (
+                          <div className="text-sm" style={{ color: '#4B5563' }}>
+                            <span className="font-medium" style={{ color: '#111827' }}>Note:</span> {entry.note}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="text-center py-10 text-gray-500">
+                  <p>No stock additions found.</p>
                 </div>
               )}
             </div>

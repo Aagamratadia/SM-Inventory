@@ -10,6 +10,15 @@ export interface IAssignment extends Document {
   performedBy?: Types.ObjectId; // actor who performed the action
 }
 
+export interface IStockAddition extends Document {
+  quantity: number;
+  addedAt: Date;
+  performedBy?: Types.ObjectId;
+  priceAtAddition?: number;
+  note?: string;
+  vendorName?: string;
+}
+
 export interface IItem extends Document {
   category: string; // Added category field
   name: string;
@@ -28,6 +37,7 @@ export interface IItem extends Document {
   assignmentHistory: IAssignment[];
   isScrap?: boolean;
   scrappedAt?: Date;
+  stockAdditions?: IStockAddition[];
   reserved: number; // Added reserved field
 }
 
@@ -39,6 +49,15 @@ const AssignmentSchema: Schema = new Schema({
   action: { type: String, required: true, enum: ['assigned', 'returned'] },
   quantity: { type: Number, required: true, min: 1 },
   performedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+});
+
+const StockAdditionSchema: Schema = new Schema({
+  quantity: { type: Number, required: true, min: 1 },
+  addedAt: { type: Date, default: Date.now },
+  performedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  priceAtAddition: { type: Number },
+  note: { type: String },
+  vendorName: { type: String, trim: true },
 });
 
 const ItemSchema: Schema = new Schema(
@@ -82,6 +101,7 @@ const ItemSchema: Schema = new Schema(
     notes: { type: String },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     assignmentHistory: [AssignmentSchema],
+    stockAdditions: { type: [StockAdditionSchema], default: [] },
     isScrap: { type: Boolean, default: false },
     scrappedAt: { type: Date },
   },

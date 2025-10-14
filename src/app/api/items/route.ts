@@ -69,7 +69,16 @@ export async function POST(request: Request) {
       quantity: qtyNum,
       totalQuantity: qtyNum,
       price: priceNum,
-    };
+      stockAdditions: [
+        {
+          quantity: qtyNum,
+          addedAt: new Date(),
+          performedBy: (session.user as any)?.id || undefined,
+          priceAtAddition: priceNum,
+          note: body?.notes || undefined,
+        },
+      ],
+    } as any;
 
     // If vendorname provided, ensure a Vendor exists; create if missing
     if (payload.vendorname && typeof payload.vendorname === 'string') {
