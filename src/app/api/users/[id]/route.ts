@@ -5,6 +5,34 @@ import User from '@/models/User';
 import { getServerSession } from 'next-auth/next';
 import { auth as authOptions } from '@/auth.config';
 
+export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
+  }
+
+  try {
+    await dbConnect();
+    const requesterIsAdmin = session.user.role === 'admin';
+    const requesterIsSelf = session.user.id === id;
+    if (!requesterIsAdmin && !requesterIsSelf) {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
+    const user = await User.findById(id).select('name email role department');
+    if (!user) return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    return NextResponse.json(user, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 

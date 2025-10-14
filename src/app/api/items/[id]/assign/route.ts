@@ -25,11 +25,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   try {
     await dbConnect();
 
+    // Only admins may assign directly (until request/approval flow is live)
+    const role = (session as any)?.user?.role;
+    if (role !== 'admin') {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
     const itemToAssign = await Item.findById(id);
     if (!itemToAssign) {
       return NextResponse.json({ message: 'Item not found' }, { status: 404 });
     }
-    const available = itemToAssign.quantity ?? 0;
+    const available = (itemToAssign.quantity ?? 0) - (itemToAssign.reserved ?? 0);
     if (available <= 0) {
       return NextResponse.json({ message: 'No stock available to assign' }, { status: 400 });
     }
@@ -51,8 +57,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       });
     }
 
-    // Decrement available stock and record assignment entry with quantity
-    itemToAssign.quantity = available - qty;
+    // Decrement on-hand stock and record assignment entry with quantity
+    itemToAssign.quantity = (itemToAssign.quantity ?? 0) - qty;
     // If any stock is assigned, mark as assigned to the latest user for simplicity.
     // A more complex system would track assignments per user.
     itemToAssign.assignedTo = userId;

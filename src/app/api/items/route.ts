@@ -14,10 +14,11 @@ export async function GET(request: Request) {
 
   try {
     await dbConnect();
-    try { await Item.syncIndexes(); } catch (e) { console.warn('Item.syncIndexes GET warning:', e); }
     // Exclude scrap items from main inventory list
     const items = await Item.find({ isScrap: { $ne: true } })
       .populate('assignedTo', 'name')
+      .populate({ path: 'assignmentHistory.user', select: 'name' })
+      .populate({ path: 'assignmentHistory.performedBy', select: 'name' })
       .sort({ createdAt: -1 });
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
@@ -38,7 +39,6 @@ export async function POST(request: Request) {
 
   try {
     await dbConnect();
-    try { await Item.syncIndexes(); } catch (e) { console.warn('Item.syncIndexes POST warning:', e); }
     const body = await request.json();
     
     // Basic validation

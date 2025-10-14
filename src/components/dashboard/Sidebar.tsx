@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export default function Sidebar() {
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const toggleInventoryDropdown = () => {
     setIsInventoryOpen(!isInventoryOpen);
@@ -47,6 +49,20 @@ export default function Sidebar() {
             >
               Stock Tracker
             </Link>
+            <Link
+              href="/dashboard/requests"
+              className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 hover:text-white ${pathname === '/dashboard/requests' ? 'text-white' : ''}`}
+              style={pathname === '/dashboard/requests' ? { backgroundColor: '#6366F1' } : { color: '#4B5563' }}
+            >
+              My Requests
+            </Link>
+            <Link
+              href="/dashboard/requests/new"
+              className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 hover:text-white ${pathname === '/dashboard/requests/new' ? 'text-white' : ''}`}
+              style={pathname === '/dashboard/requests/new' ? { backgroundColor: '#6366F1' } : { color: '#4B5563' }}
+            >
+              New Request
+            </Link>
           </div>
         )}
       </div>
@@ -71,6 +87,13 @@ export default function Sidebar() {
         style={pathname === '/dashboard/scrap' ? { backgroundColor: '#6366F1' } : { color: '#4B5563' }}
       >
         Scrap Materials
+      </Link>
+      <Link
+        href="/dashboard/requests"
+        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 hover:text-white ${pathname === '/dashboard/requests' ? 'text-white' : ''}`}
+        style={pathname === '/dashboard/requests' ? { backgroundColor: '#6366F1' } : { color: '#4B5563' }}
+      >
+        My Requests
       </Link>
     </div>
   );

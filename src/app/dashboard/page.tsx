@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 
 import Modal from '@/components/ui/Modal';
@@ -12,6 +13,7 @@ import Link from 'next/link';
 import { Plus, Search, MoreVertical, UserPlus, ChevronUp } from 'lucide-react';
 
 export default function InventoryPage() {
+  const { data: session } = useSession();
   const [items, setItems] = useState<IItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<IItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,10 +161,13 @@ export default function InventoryPage() {
                   <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Category</span>
                 </th>
                 <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
-                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Available Quantity</span>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>On Hand</span>
                 </th>
                 <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
-                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Assigned Quantity</span>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Reserved</span>
+                </th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
+                  <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Available</span>
                 </th>
                 <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#4B5563' }}>
                   <span className="inline-flex items-center justify-center rounded-full text-center whitespace-nowrap" style={{ border: '0.75px solid #6366F1', backgroundColor: 'rgba(99,102,241,0.85)', color: '#FFFFFF', padding: '5px 14px' }}>Actions</span>
@@ -180,13 +185,21 @@ export default function InventoryPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{item.quantity || 0}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{(item.totalQuantity || 0) - (item.quantity || 0)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{(item as any).reserved || 0}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium" style={{ color: '#111827' }}>{(item.quantity || 0) - ((item as any).reserved || 0)}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         {(item.quantity || 0) > 0 && (
-                          <button onClick={() => setItemToAssign(item)} className="flex items-center px-3 py-1.5 text-xs text-white rounded-md transition-colors hover:bg-indigo-700" style={{ backgroundColor: '#6366F1' }}>
+                          <button onClick={() => {
+                            if (session?.user?.role === 'admin') {
+                              setItemToAssign(item);
+                            } else {
+                              // navigate to the request form
+                              window.location.href = '/dashboard/requests/new';
+                            }
+                          }} className="flex items-center px-3 py-1.5 text-xs text-white rounded-md transition-colors hover:bg-indigo-700" style={{ backgroundColor: '#6366F1' }}>
                             <UserPlus className="w-4 h-4 mr-1.5" />
-                            Assign
+                            {session?.user?.role === 'admin' ? 'Assign' : 'Request'}
                           </button>
                         )}
                         <div className="relative">
@@ -226,17 +239,19 @@ export default function InventoryPage() {
                           <table className="min-w-full divide-y" style={{ borderColor: '#E5E7EB' }}>
                             <thead style={{ backgroundColor: '#F9FAFB' }}>
                               <tr>
-                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>User</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Assigned To</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Assigned By</th>
                                 <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Action</th>
                                 <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Quantity</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Date</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Assigned At</th>
                                 <th className="px-3 py-2 text-left text-xs font-medium uppercase" style={{ color: '#4B5563' }}>Actions</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y" style={{ borderColor: '#E5E7EB' }}>
                               {[...item.assignmentHistory].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime()).map(assignment => (
                                 <tr key={assignment._id as string}>
-                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{(assignment.user as any)?.name || 'N/A'}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{(assignment.user as any)?.name}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{(assignment.performedBy as any)?.name}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{assignment.action}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{assignment.quantity}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-xs" style={{ color: '#111827' }}>{new Date(assignment.assignedAt).toLocaleString()}</td>

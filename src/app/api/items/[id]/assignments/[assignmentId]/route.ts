@@ -20,6 +20,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     await dbConnect();
 
+    // Only admins may delete assignment history entries (since it mutates stock)
+    const role = (session as any)?.user?.role;
+    if (role !== 'admin') {
+      return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+
     const item = await Item.findById(itemId);
     if (!item) {
       return NextResponse.json({ message: 'Item not found' }, { status: 404 });
@@ -33,11 +39,15 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ message: 'Assignment not found' }, { status: 404 });
     }
 
-    // Revert the quantity change
+    // Revert the quantity change, guard against negative stock
     if (assignment.action === 'assigned') {
       item.quantity += assignment.quantity;
     } else if (assignment.action === 'returned') {
-      item.quantity -= assignment.quantity;
+      const newQty = (item.quantity ?? 0) - assignment.quantity;
+      if (newQty < 0) {
+        return NextResponse.json({ message: 'Reverting this return would make stock negative' }, { status: 409 });
+      }
+      item.quantity = newQty;
     }
 
     // Remove the assignment from history

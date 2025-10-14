@@ -28,6 +28,7 @@ export interface IItem extends Document {
   assignmentHistory: IAssignment[];
   isScrap?: boolean;
   scrappedAt?: Date;
+  reserved: number; // Added reserved field
 }
 
 const AssignmentSchema: Schema = new Schema({
@@ -75,6 +76,7 @@ const ItemSchema: Schema = new Schema(
     price: { type: Number },
     // quantity is AVAILABLE count
     quantity: { type: Number, default: 0, min: 0 },
+    reserved: { type: Number, default: 0, min: 0 },
     // totalQuantity is TOTAL count ever added (initially equals quantity)
     totalQuantity: { type: Number, default: 0, min: 0 },
     notes: { type: String },
