@@ -30,6 +30,8 @@ export default function InventoryPage() {
   const [addStockError, setAddStockError] = useState<string>('');
   const [addStockPrice, setAddStockPrice] = useState<string>('');
   const [addStockNote, setAddStockNote] = useState<string>('');
+  const [addStockVendor, setAddStockVendor] = useState<string>('');
+  const [vendorNames, setVendorNames] = useState<string[]>([]);
 
   const fetchItems = async () => {
     try {
@@ -137,6 +139,7 @@ export default function InventoryPage() {
           quantity: qtyNum,
           price: addStockPrice !== '' ? Number(addStockPrice) : undefined,
           note: addStockNote || undefined,
+          vendorName: addStockVendor || undefined,
         }),
       });
       const data = await res.json();
@@ -149,12 +152,28 @@ export default function InventoryPage() {
       setAddStockQty('');
       setAddStockPrice('');
       setAddStockNote('');
+      setAddStockVendor('');
     } catch (e: any) {
       setAddStockError(e.message || 'Failed to add stock');
     } finally {
       setAddingStock(false);
     }
   };
+
+  useEffect(() => {
+    const loadVendors = async () => {
+      try {
+        const r = await fetch('/api/vendors');
+        if (!r.ok) return;
+        const data = await r.json();
+        const names = Array.isArray(data) ? data.map((v: any) => v.name).filter(Boolean) : [];
+        setVendorNames(names);
+      } catch {}
+    };
+    if (itemToAddStock) {
+      loadVendors();
+    }
+  }, [itemToAddStock]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -338,7 +357,7 @@ export default function InventoryPage() {
       )}
 
       {itemToAddStock && (
-        <Modal isOpen={!!itemToAddStock} onClose={() => { setItemToAddStock(null); setAddStockQty(''); setAddStockError(''); setAddStockPrice(''); setAddStockNote(''); }} title={`Add Stock: ${itemToAddStock.name}`}>
+        <Modal isOpen={!!itemToAddStock} onClose={() => { setItemToAddStock(null); setAddStockQty(''); setAddStockError(''); setAddStockPrice(''); setAddStockNote(''); setAddStockVendor(''); }} title={`Add Stock: ${itemToAddStock.name}`}>
           <div>
             <label className="block text-sm mb-2" style={{ color: '#4B5563' }}>Quantity to add</label>
             <input
@@ -373,11 +392,28 @@ export default function InventoryPage() {
                 />
               </div>
             </div>
+            <div className="mt-4">
+              <label className="block text-sm mb-2" style={{ color: '#4B5563' }}>Vendor (optional)</label>
+              <input
+                type="text"
+                list="vendors-list"
+                value={addStockVendor}
+                onChange={(e) => setAddStockVendor(e.target.value)}
+                placeholder="Select or type vendor name"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                style={{ borderColor: '#E5E7EB', color: '#111827', backgroundColor: '#FFFFFF' }}
+              />
+              <datalist id="vendors-list">
+                {vendorNames.map((v) => (
+                  <option key={v} value={v} />
+                ))}
+              </datalist>
+            </div>
             {addStockError && (
               <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>{addStockError}</p>
             )}
             <div className="mt-4 flex justify-end space-x-3">
-              <button onClick={() => { setItemToAddStock(null); setAddStockQty(''); setAddStockError(''); setAddStockPrice(''); setAddStockNote(''); }} className="px-4 py-2 rounded" style={{ backgroundColor: '#E5E7EB', color: '#4B5563' }}>Cancel</button>
+              <button onClick={() => { setItemToAddStock(null); setAddStockQty(''); setAddStockError(''); setAddStockPrice(''); setAddStockNote(''); setAddStockVendor(''); }} className="px-4 py-2 rounded" style={{ backgroundColor: '#E5E7EB', color: '#4B5563' }}>Cancel</button>
               <button onClick={handleSubmitAddStock} disabled={addingStock} className="px-4 py-2 text-white rounded disabled:opacity-70" style={{ backgroundColor: '#6366F1' }}>{addingStock ? 'Adding...' : 'Add'}</button>
             </div>
           </div>

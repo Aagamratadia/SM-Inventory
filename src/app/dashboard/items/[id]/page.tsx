@@ -254,6 +254,12 @@ export default function ItemDetailPage() {
                                 <p className="font-semibold" style={{ color: '#111827' }}>₹{Number(entry.priceAtAddition).toLocaleString()}</p>
                               </div>
                             )}
+                            {entry.vendorName && (
+                              <div className="text-right">
+                                <p className="text-sm" style={{ color: '#4B5563' }}>Vendor</p>
+                                <p className="font-semibold" style={{ color: '#111827' }}>{entry.vendorName}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                         {entry.note && (

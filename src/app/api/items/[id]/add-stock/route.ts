@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Item from '@/models/Item';
+import Vendor from '@/models/Vendor';
 import { getServerSession } from 'next-auth/next';
 import { auth as authOptions } from '@/auth.config';
 
@@ -25,10 +26,24 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ message: 'Price must be a non-negative number' }, { status: 400 });
     }
     const note: string | undefined = body?.note || undefined;
+    const vendorNameRaw: string | undefined = typeof body?.vendorName === 'string' ? body.vendorName.trim() : undefined;
 
     await dbConnect();
 
     const userId = (session as any)?.user?.id || (session as any)?.user?._id;
+
+    // If vendorName provided, upsert vendor (non-fatal if fails)
+    if (vendorNameRaw) {
+      try {
+        await Vendor.findOneAndUpdate(
+          { name: vendorNameRaw },
+          { $setOnInsert: { name: vendorNameRaw } },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+      } catch (e) {
+        console.warn('Vendor upsert warning (add-stock):', e);
+      }
+    }
     const updateDoc: any = {
       $inc: { quantity: qtyNum, totalQuantity: qtyNum },
       $push: {
@@ -38,6 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           performedBy: userId || undefined,
           priceAtAddition: priceNum,
           note,
+          vendorName: vendorNameRaw,
         },
       },
     };

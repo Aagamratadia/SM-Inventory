@@ -16,6 +16,7 @@ export interface IStockAddition extends Document {
   performedBy?: Types.ObjectId;
   priceAtAddition?: number;
   note?: string;
+  vendorName?: string;
 }
 
 export interface IItem extends Document {
@@ -55,6 +56,7 @@ const StockAdditionSchema: Schema = new Schema({
   performedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   priceAtAddition: { type: Number },
   note: { type: String },
+  vendorName: { type: String, trim: true },
 });
 
 const ItemSchema: Schema = new Schema(
