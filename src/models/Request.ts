@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export type RequestStatus = 'Pending' | 'Approved' | 'Rejected' | 'Cancelled';
+export type RequestStatus = 'Pending' | 'Approved' | 'Rejected' | 'Cancelled' | 'Completed';
 
 export interface IRequestItem {
   itemId: Types.ObjectId;
@@ -18,6 +18,9 @@ export interface IRequest extends Document {
   decisionAt?: Date;
   decisionBy?: Types.ObjectId;
   decisionNote?: string;
+  fulfilledAt?: Date;
+  fulfilledBy?: Types.ObjectId;
+  fulfillmentNote?: string;
 }
 
 const RequestItemSchema = new Schema<IRequestItem>(
@@ -33,7 +36,7 @@ const RequestItemSchema = new Schema<IRequestItem>(
 const RequestSchema = new Schema<IRequest>(
   {
     requesterId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    status: { type: String, enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'], default: 'Pending', index: true },
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected', 'Cancelled', 'Completed'], default: 'Pending', index: true },
     items: {
       type: [RequestItemSchema],
       required: true,
@@ -47,6 +50,9 @@ const RequestSchema = new Schema<IRequest>(
     decisionAt: { type: Date },
     decisionBy: { type: Schema.Types.ObjectId, ref: 'User' },
     decisionNote: { type: String },
+    fulfilledAt: { type: Date },
+    fulfilledBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    fulfillmentNote: { type: String },
   },
   { timestamps: false }
 );

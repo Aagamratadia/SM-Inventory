@@ -20,13 +20,16 @@ interface Requester {
 interface RequestDoc {
   _id: string;
   requesterId: string | Requester;
-  status: 'Pending' | 'Approved' | 'Rejected' | 'Cancelled';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Cancelled' | 'Completed';
   items: RequestItem[];
   note?: string;
   submittedAt: string;
+  decisionAt?: string;
+  decisionBy?: string;
+  decisionNote?: string;
 }
 
-export default function ApprovalsQueuePage() {
+export default function WarehouseQueuePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requests, setRequests] = useState<RequestDoc[]>([]);
@@ -36,7 +39,7 @@ export default function ApprovalsQueuePage() {
     const run = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/admin/requests?status=Pending');
+        const res = await fetch('/api/warehouse/requests?fulfilled=false');
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || 'Failed to load requests');
         setRequests(data);
@@ -52,13 +55,13 @@ export default function ApprovalsQueuePage() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return requests.filter(r =>
-      r.items.some(i => i.itemName.toLowerCase().includes(q)) ||
+      r.items.some(i => i.itemName.toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q)) ||
       (r.note || '').toLowerCase().includes(q) ||
       r._id.toLowerCase().includes(q)
     );
   }, [requests, search]);
 
-  if (loading) return <div className="p-6">Loading approvals…</div>;
+  if (loading) return <div className="p-6">Loading warehouse queue…</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
@@ -69,8 +72,8 @@ export default function ApprovalsQueuePage() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Link>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#111827' }}>Approvals Queue</h1>
-        <p className="text-sm" style={{ color: '#6B7280' }}>Review and approve pending requests</p>
+        <h1 className="text-3xl font-bold mb-2" style={{ color: '#111827' }}>Warehouse Queue</h1>
+        <p className="text-sm" style={{ color: '#6B7280' }}>Approved requests ready for fulfillment</p>
       </div>
 
       {/* Search Bar */}
@@ -89,7 +92,7 @@ export default function ApprovalsQueuePage() {
       <div className="space-y-4">
         {filtered.length === 0 && (
           <div className="p-6 rounded-lg text-center" style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>
-            <p className="text-sm font-medium">No pending requests found.</p>
+            <p className="text-sm font-medium">No approved requests to fulfill.</p>
           </div>
         )}
 
@@ -99,7 +102,7 @@ export default function ApprovalsQueuePage() {
           const itemsList = req.items.map(i => i.itemName).join(', ');
           
           return (
-            <Link key={req._id} href={`/admin/approvals/${req._id}`}>
+            <Link key={req._id} href={`/warehouse/${req._id}`}>
               <div 
                 className="p-5 bg-white rounded-lg shadow-sm hover:shadow-md transition-all border-l-4 cursor-pointer text-left w-full"
                 style={{ 
@@ -116,8 +119,8 @@ export default function ApprovalsQueuePage() {
                       <span className="text-sm font-bold" style={{ color: '#111827' }}>
                         {requesterName}
                       </span>
-                      <span className="px-2 py-0.5 text-xs rounded-full font-medium" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>
-                        Pending
+                      <span className="px-2 py-0.5 text-xs rounded-full font-medium" style={{ backgroundColor: '#DBEAFE', color: '#1E40AF' }}>
+                        Approved
                       </span>
                     </div>
                     <div className="text-xs font-medium" style={{ color: '#6366F1' }}>

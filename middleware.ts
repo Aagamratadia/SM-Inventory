@@ -25,6 +25,29 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Warehouse area: allow admin or warehouse roles
+  if (pathname.startsWith('/warehouse')) {
+    if (role !== 'admin' && role !== 'warehouse') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+  }
+
+  // Admin-only dashboard pages
+  if (pathname.startsWith('/dashboard/users') || 
+      pathname.startsWith('/dashboard/vendors') || 
+      pathname.startsWith('/dashboard/scrap')) {
+    if (role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+  }
+
+  // Stock tracker - admin only (or could be read-only for others)
+  if (pathname.startsWith('/dashboard/stock')) {
+    if (role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+  }
+
   // For requests pages, any authenticated user is allowed.
   // No extra checks needed; reaching here means token exists.
 
@@ -36,5 +59,10 @@ export const config = {
     '/admin/:path*',
     '/dashboard/requests',
     '/dashboard/requests/:path*',
+    '/dashboard/users/:path*',
+    '/dashboard/vendors/:path*',
+    '/dashboard/scrap/:path*',
+    '/dashboard/stock/:path*',
+    '/warehouse/:path*',
   ],
 };
