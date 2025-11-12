@@ -4,10 +4,7 @@ import { auth as authOptions } from '@/auth.config';
 import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
 import RequestModel from '@/models/Request';
-import Item from '@/models/Item';
-import Assignment from '@/models/Assignment';
 import Notification from '@/models/Notification';
-import User from '@/models/User';
 
 export async function PATCH(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

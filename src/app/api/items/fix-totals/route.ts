@@ -17,7 +17,7 @@ function computeTotalFromHistory(item: any): number {
   return available + Math.max(netAssigned, 0);
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

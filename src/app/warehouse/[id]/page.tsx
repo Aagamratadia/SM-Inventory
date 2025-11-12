@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function WarehouseDetailPage({ params }: { params: { id: string }
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/warehouse/requests/${id}`);
@@ -50,9 +50,9 @@ export default function WarehouseDetailPage({ params }: { params: { id: string }
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { void load(); }, [load]);
 
   const totalQty = useMemo(() => reqDoc?.items.reduce((a, b) => a + Number(b.qty || 0), 0) || 0, [reqDoc]);
 

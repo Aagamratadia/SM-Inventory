@@ -6,7 +6,7 @@ import { getServerSession } from 'next-auth';
 import { auth as authOptions } from '@/auth.config';
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const _session = await getServerSession(authOptions);
   // In a real app, you'd want to check if the session user is an admin
   // if (!session || session.user.role !== 'admin') {
   //   return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -55,8 +55,8 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
-    const session = await getServerSession(authOptions);
+export async function GET(_request: Request) {
+    const _session = await getServerSession(authOptions);
     // if (!session) {
     //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     // }

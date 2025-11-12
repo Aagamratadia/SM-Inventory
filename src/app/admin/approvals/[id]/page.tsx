@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -41,7 +41,7 @@ export default function ApprovalDetailPage({ params }: { params: { id: string } 
   const [rejectReason, setRejectReason] = useState('');
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/admin/requests/${id}`);
@@ -54,9 +54,14 @@ export default function ApprovalDetailPage({ params }: { params: { id: string } 
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+    const run = async () => {
+      await load();
+    };
+    void run();
+  }, [load]);
 
   const approve = async () => {
     if (!reqDoc) return;
@@ -156,7 +161,7 @@ export default function ApprovalDetailPage({ params }: { params: { id: string } 
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: '#E5E7EB' }}>
-                {reqDoc.items.map((it, idx) => (
+                {reqDoc.items.map((it) => (
                   <tr key={it.itemId} className="hover:bg-gray-50">
                     <td className="py-3 font-medium" style={{ color: '#111827' }}>{it.itemName}</td>
                     <td className="py-3" style={{ color: '#6B7280' }}>{it.category || '—'}</td>

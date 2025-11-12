@@ -43,7 +43,7 @@ export default function AssignmentLogPage() {
         const id = await i.json();
         setItems((id || []).map((x: any) => ({ name: x.name, category: x.category })));
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   };

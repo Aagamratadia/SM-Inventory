@@ -40,7 +40,7 @@ export default function VendorsPage() {
     fetchVendors();
   }, []);
 
-  const handleVendorAdded = (newVendor: IVendor) => {
+  const handleVendorAdded = (_newVendor: IVendor) => {
     // On creation, items may not be present; re-fetch to include items aggregation
     fetchVendors();
     setIsAddModalOpen(false);

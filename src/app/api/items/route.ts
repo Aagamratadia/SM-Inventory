@@ -6,7 +6,7 @@ import { auth as authOptions } from '@/auth.config';
 import Vendor from '@/models/Vendor';
 
 // GET all items
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

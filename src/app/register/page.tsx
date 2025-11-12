@@ -36,7 +36,7 @@ export default function RegisterPage() {
         const data = await res.json();
         setError(data.message || 'Something went wrong.');
       }
-    } catch (err: any) {
+    } catch {
       setError('An unexpected error occurred.');
     } finally {
       setSubmitting(false);

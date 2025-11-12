@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { IItem } from '@/models/Item';
-import { Box, Package, DollarSign, User, Calendar, Tag, ClipboardList, ArrowLeft, Building2, Phone, Mail, MapPin } from 'lucide-react';
+import { Package, DollarSign, User, Calendar, ClipboardList, ArrowLeft, Building2, Phone, Mail, MapPin } from 'lucide-react';
 
 export default function ItemDetailPage() {
   const [item, setItem] = useState<IItem | null>(null);
