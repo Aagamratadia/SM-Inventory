@@ -160,6 +160,13 @@ export default function Sidebar() {
                 Users
               </Link>
               <Link
+                href="/dashboard/reports"
+                className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 hover:text-white ${pathname === '/dashboard/reports' ? 'text-white' : ''}`}
+                style={pathname === '/dashboard/reports' ? { backgroundColor: '#6366F1' } : { color: '#4B5563' }}
+              >
+                Reports
+              </Link>
+              <Link
                 href="/dashboard/vendors"
                 className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 hover:text-white ${pathname === '/dashboard/vendors' ? 'text-white' : ''}`}
                 style={pathname === '/dashboard/vendors' ? { backgroundColor: '#6366F1' } : { color: '#4B5563' }}
