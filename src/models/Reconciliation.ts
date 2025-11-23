@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IReconciliation extends Document {
+  _id: Types.ObjectId;
   item: Types.ObjectId;
   countedQty: number;
   systemQty: number;

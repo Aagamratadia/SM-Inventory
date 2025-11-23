@@ -31,12 +31,6 @@ interface ReportFilters {
   includeStockAdditions?: boolean;
 }
 
-interface ReportResult {
-  columns: { key: string; header: string }[];
-  rows: Record<string, any>[];
-  fileName: string;
-}
-
 const REPORT_OPTIONS: { value: ReportType; label: string }[] = [
   { value: 'inventorySnapshot', label: 'Inventory Snapshot' },
   { value: 'departmentInventory', label: 'Department Inventory' },
@@ -53,6 +47,13 @@ const ACTION_OPTIONS = [
 
 const INITIAL_FILTERS: ReportFilters = {
   includeStockAdditions: false,
+};
+
+const arraysEqual = (a?: string[], b?: string[]) => {
+  if (a === b) return true;
+  if (!a || !b) return !a && !b;
+  if (a.length !== b.length) return false;
+  return a.every((value, index) => value === b[index]);
 };
 
 function getReportHelpText(reportType: ReportType): string {
@@ -81,7 +82,6 @@ export default function ReportsPage() {
   const [reportType, setReportType] = useState<ReportType>('inventorySnapshot');
   const [filters, setFilters] = useState<ReportFilters>({ ...INITIAL_FILTERS });
 
-  const [result, setResult] = useState<ReportResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -95,10 +95,10 @@ export default function ReportsPage() {
     notes: '',
   });
 
-  const [itemSearch, setItemSearch] = useState('');
   const [selectAllItems, setSelectAllItems] = useState(false);
   const [selectAllDepartments, setSelectAllDepartments] = useState(true);
   const [selectAllUsers, setSelectAllUsers] = useState(true);
+  const [itemScope, setItemScope] = useState<'department' | 'category'>('department');
 
   const isAdmin = session?.user?.role === 'admin';
 
@@ -134,16 +134,15 @@ export default function ReportsPage() {
       ...INITIAL_FILTERS,
       includeStockAdditions: type === 'inventorySnapshot' ? false : undefined,
     });
-    setItemSearch('');
     setSelectAllItems(false);
     setSelectAllDepartments(true);
     setSelectAllUsers(true);
+    setItemScope('department');
   }, []);
 
   const handleReportChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value as ReportType;
     setReportType(value);
-    setResult(null);
     setError('');
     resetFiltersForReport(value);
   };
@@ -155,30 +154,37 @@ export default function ReportsPage() {
     }));
   };
 
+  const handleItemScopeChange = (scope: 'department' | 'category') => {
+    setItemScope(scope);
+    setSelectAllItems(false);
+  };
+
   const applicableUsers = useMemo(() => context?.users || [], [context]);
 
   const filteredItems = useMemo(() => {
     if (!context) return [] as ReportContext['items'];
 
     let scopedItems = context.items;
-    if (filters.department && context.departmentItems) {
+    if (itemScope === 'department' && filters.department && context.departmentItems) {
       const deptIds = new Set(context.departmentItems[filters.department] || []);
       scopedItems = scopedItems.filter((item) => deptIds.has(item.id));
     }
 
-    const term = itemSearch.trim().toLowerCase();
-    if (!term) return scopedItems;
+    if (itemScope === 'category' && filters.category) {
+      scopedItems = scopedItems.filter((item) => item.category === filters.category);
+    }
 
-    return scopedItems.filter((item) => {
-      const haystack = `${item.name} ${item.itemId || ''}`.toLowerCase();
-      return haystack.includes(term);
-    });
-  }, [context, filters.department, itemSearch]);
+    return scopedItems;
+  }, [context, filters.category, filters.department, filters.itemIds, itemScope]);
 
   const toggleItemId = (itemId: string) => {
     setFilters((prev) => {
       const current = new Set(prev.itemIds || []);
-      current.has(itemId) ? current.delete(itemId) : current.add(itemId);
+      if (current.has(itemId)) {
+        current.delete(itemId);
+      } else {
+        current.add(itemId);
+      }
       const values = Array.from(current);
       return {
         ...prev,
@@ -207,16 +213,12 @@ export default function ReportsPage() {
 
   const handleDepartmentChange = (value: string) => {
     const nextDepartment = value || undefined;
+    const deptItems = nextDepartment && context?.departmentItems ? context.departmentItems[nextDepartment] || [] : [];
 
     setFilters((prev) => {
       let nextItemIds = prev.itemIds;
-      if (context?.departmentItems) {
-        if (nextDepartment) {
-          const deptItems = context.departmentItems[nextDepartment] || [];
-          nextItemIds = deptItems.length ? deptItems : undefined;
-        } else {
-          nextItemIds = prev.itemIds;
-        }
+      if (itemScope === 'department') {
+        nextItemIds = nextDepartment ? (deptItems.length ? [...deptItems] : undefined) : undefined;
       }
       return {
         ...prev,
@@ -225,35 +227,100 @@ export default function ReportsPage() {
       };
     });
 
-    setSelectAllItems(false);
+    if (itemScope === 'department') {
+      setSelectAllItems(false);
+    }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    const nextCategory = value || undefined;
+    const categoryItems = nextCategory && context
+      ? context.items.filter((item) => item.category === nextCategory).map((item) => item.id)
+      : [];
+
+    setFilters((prev) => {
+      let nextItemIds = prev.itemIds;
+      if (itemScope === 'category') {
+        nextItemIds = nextCategory ? (categoryItems.length ? categoryItems : undefined) : undefined;
+      }
+      return {
+        ...prev,
+        category: nextCategory,
+        itemIds: nextItemIds,
+      };
+    });
+
+    if (itemScope === 'category') {
+      setSelectAllItems(false);
+    }
   };
 
   const toggleSelectAllDepartments = () => {
-    const shouldSelectAll = !selectAllDepartments;
-    setSelectAllDepartments(shouldSelectAll);
-    if (shouldSelectAll) {
-      handleFilterChange('department', undefined);
+    const next = !selectAllDepartments;
+    setSelectAllDepartments(next);
+    if (next) {
+      handleDepartmentChange('');
     }
   };
 
   const toggleSelectAllUsers = () => {
-    const shouldSelectAll = !selectAllUsers;
-    setSelectAllUsers(shouldSelectAll);
-    if (shouldSelectAll) {
-      handleFilterChange('userId', undefined);
-      handleFilterChange('performedBy', undefined);
-    }
+    setSelectAllUsers((prev) => {
+      const next = !prev;
+      if (next) {
+        handleFilterChange('userId', undefined);
+        handleFilterChange('performedBy', undefined);
+      }
+      return next;
+    });
   };
 
   useEffect(() => {
-    const available = filteredItems.length;
-    if (available === 0) {
-      setSelectAllItems(false);
+    if (!context) return;
+
+    let nextItemIds: string[] | undefined;
+    if (itemScope === 'department') {
+      if (filters.department && context.departmentItems) {
+        const deptIds = context.departmentItems[filters.department] || [];
+        nextItemIds = deptIds.length ? [...deptIds] : undefined;
+      } else {
+        nextItemIds = undefined;
+      }
+    } else if (itemScope === 'category') {
+      if (filters.category) {
+        const categoryIds = context.items
+          .filter((item) => item.category === filters.category)
+          .map((item) => item.id);
+        nextItemIds = categoryIds.length ? categoryIds : undefined;
+      } else {
+        nextItemIds = undefined;
+      }
+    }
+
+    if (arraysEqual(filters.itemIds, nextItemIds)) {
       return;
     }
-    const selectedCount = (filters.itemIds || []).filter((id) => filteredItems.some((item) => item.id === id)).length;
-    setSelectAllItems(selectedCount === available);
-  }, [filteredItems, filters.itemIds]);
+
+    setFilters((prev) => ({
+      ...prev,
+      itemIds: nextItemIds,
+    }));
+  }, [context, filters.category, filters.department, itemScope]);
+
+  useEffect(() => {
+    if (!filteredItems.length) {
+      if (selectAllItems) {
+        setSelectAllItems(false);
+      }
+      return;
+    }
+    const selectedCount = (filters.itemIds || []).filter((id) =>
+      filteredItems.some((item) => item.id === id)
+    ).length;
+    const isAllSelected = selectedCount === filteredItems.length;
+    if (selectAllItems !== isAllSelected) {
+      setSelectAllItems(isAllSelected);
+    }
+  }, [filteredItems, filters.itemIds, selectAllItems]);
 
   useEffect(() => {
     setSelectAllDepartments(!filters.department);
@@ -262,37 +329,6 @@ export default function ReportsPage() {
   useEffect(() => {
     setSelectAllUsers(!filters.userId);
   }, [filters.userId]);
-
-  const handlePreview = async () => {
-    setLoading(true);
-    setError('');
-    setSuccessMessage('');
-    try {
-      const res = await fetch('/api/reports', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ reportType, filters, fullExport: false }),
-      });
-      if (!res.ok) {
-        let data: any = {};
-        try {
-          data = await res.json();
-        } catch (e) {
-          // ignore
-        }
-        throw new Error(data.message || 'Failed to generate report preview');
-      }
-      const json = (await res.json()) as ReportResult;
-      setResult(json);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate report preview');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleExport = async () => {
     setLoading(true);
@@ -311,7 +347,7 @@ export default function ReportsPage() {
         let data: any = {};
         try {
           data = await res.json();
-        } catch (e) {
+        } catch {
           // ignore
         }
         throw new Error(data.message || 'Failed to export report');
@@ -320,7 +356,7 @@ export default function ReportsPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${(result?.fileName || reportType).replace(/[^a-z0-9-_]/gi, '_')}.xlsx`;
+      link.download = `${reportType.replace(/[^a-z0-9-_]/gi, '_')}.xlsx`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -368,7 +404,6 @@ export default function ReportsPage() {
       }
       setReconForm({ itemId: '', countedQty: '', department: '', countedAt: '', notes: '' });
       setSuccessMessage('Reconciliation recorded successfully.');
-      await handlePreview();
     } catch (err: any) {
       setError(err.message || 'Failed to record reconciliation');
     } finally {
@@ -386,7 +421,6 @@ export default function ReportsPage() {
         action: reportType === 'assignmentHistory' ? prev.action : undefined,
       }));
     }
-    setResult(null);
   }, [reportType]);
 
   if (status === 'loading') {
@@ -403,23 +437,16 @@ export default function ReportsPage() {
           <div>
             <h1 className="text-3xl font-bold">Reports &amp; Exports</h1>
             <p className="text-sm text-gray-600 mt-1">
-              Generate inventory and assignment reports, preview them, and export to Excel.
+              Generate inventory and assignment reports and export them to Excel.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={handlePreview}
-              disabled={loading || contextLoading}
-              className="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-indigo-300"
-            >
-              {loading ? 'Loading...' : 'Preview'}
-            </button>
             <button
               onClick={handleExport}
               disabled={loading || contextLoading}
               className="px-4 py-2 text-indigo-600 border border-indigo-600 rounded-md hover:bg-indigo-50 disabled:opacity-60"
             >
-              Export XLSX
+              {loading ? 'Preparing…' : 'Export XLSX'}
             </button>
           </div>
         </header>
@@ -439,17 +466,6 @@ export default function ReportsPage() {
               ))}
             </select>
             <p className="text-xs text-gray-500">{getReportHelpText(reportType)}</p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Search</label>
-            <input
-              type="text"
-              value={filters.search || ''}
-              onChange={(e) => handleFilterChange('search', e.target.value || undefined)}
-              placeholder="Item name, vendor, ID..."
-              className="w-full border border-gray-300 rounded-md p-2"
-            />
           </div>
 
           <div className="space-y-3">
@@ -480,28 +496,53 @@ export default function ReportsPage() {
             </p>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="block text-sm font-medium text-gray-700">Items</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={itemSearch}
-                  onChange={(e) => setItemSearch(e.target.value)}
-                  placeholder="Search items"
-                  className="border border-gray-300 rounded-md p-2 text-sm"
-                />
-                <label className="flex items-center gap-1 text-xs text-gray-600">
-                  <input
-                    type="checkbox"
-                    checked={selectAllItems}
-                    onChange={toggleSelectAllItems}
-                    className="h-4 w-4"
-                  />
-                  Select all
-                </label>
+          <section className="space-y-3">
+            <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-medium text-gray-700">Item Selection</h2>
+                <p className="text-xs text-gray-500">
+                  Choose whether to scope items by department assignments or by category, then pick specific items.
+                </p>
               </div>
+              <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  onClick={() => handleItemScopeChange('department')}
+                  className={`px-3 py-1 text-sm font-medium border ${
+                    itemScope === 'department'
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-gray-700 border-gray-300'
+                  } rounded-l-md`}
+                >
+                  Department scope
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleItemScopeChange('category')}
+                  className={`px-3 py-1 text-sm font-medium border-t border-b ${
+                    itemScope === 'category'
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-gray-700 border-gray-300'
+                  } rounded-r-md`}
+                >
+                  Category scope
+                </button>
+              </div>
+            </header>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">Items</span>
+              <label className="flex items-center gap-1 text-xs text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={selectAllItems}
+                  onChange={toggleSelectAllItems}
+                  className="h-4 w-4"
+                />
+                Select all
+              </label>
             </div>
+
             <div className="border border-gray-200 rounded-md max-h-64 overflow-y-auto p-2 space-y-2">
               {filteredItems.map((item) => {
                 const checked = filters.itemIds?.includes(item.id) ?? false;
@@ -522,10 +563,10 @@ export default function ReportsPage() {
                 );
               })}
               {filteredItems.length === 0 && (
-                <p className="text-sm text-gray-500">No items match your search.</p>
+                <p className="text-sm text-gray-500">No items available for the chosen scope.</p>
               )}
             </div>
-          </div>
+          </section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -534,7 +575,7 @@ export default function ReportsPage() {
               </div>
               <select
                 value={filters.category || ''}
-                onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
+                onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full border border-gray-300 rounded-md p-2"
               >
                 <option value="">All Categories</option>
@@ -719,43 +760,6 @@ export default function ReportsPage() {
 
       {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
       {successMessage && <div className="mb-4 text-sm text-green-600">{successMessage}</div>}
-
-      <section className="bg-white shadow rounded-lg">
-        <header className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Preview</h2>
-          <span className="text-sm text-gray-500">Showing first 500 rows</span>
-        </header>
-        <div className="overflow-auto max-h-[60vh]">
-          {loading ? (
-            <div className="p-4">Loading...</div>
-          ) : result && result.columns.length ? (
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  {result.columns.map((column) => (
-                    <th key={column.key} className="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">
-                      {column.header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {result.rows.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50">
-                    {result.columns.map((column) => (
-                      <td key={column.key} className="px-4 py-2 whitespace-nowrap text-gray-700">
-                        {String(row[column.key] ?? '')}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-4 text-sm text-gray-500">No data to display. Adjust filters and click Preview.</div>
-          )}
-        </div>
-      </section>
     </div>
   );
 }
